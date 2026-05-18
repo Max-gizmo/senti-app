@@ -571,11 +571,27 @@ function MobileAssetsView({ lang = 'ru', dark = false, onAsset = () => {} }) {
       {/* Summary card (depends on tab) */}
       <div style={{ padding: '6px 20px 6px' }}>
         {tab === 'portfolio' && (
-          <div style={{ padding: '12px 16px', borderRadius: 16, background: fieldBg }}>
-            <div style={{ fontSize: 11, color: sub, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{t(lang, 'totalBalance')}</div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginTop: 4 }}>
-              <MoneyKGS value={PORTFOLIO.balance} size={28} weight={600} color={text}/>
-              <DeltaPill value={PORTFOLIO.dayChangePct} size="sm"/>
+          <div style={{ padding: '14px 16px', borderRadius: 16, background: fieldBg, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div>
+              <div style={{ fontSize: 11, color: sub, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{t(lang, 'totalBalance')}</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginTop: 4 }}>
+                <MoneyKGS value={PORTFOLIO.balance} size={28} weight={600} color={text}/>
+                <DeltaPill value={PORTFOLIO.dayChangePct} size="sm"/>
+              </div>
+            </div>
+            {/* Allocation strip + legend */}
+            <div>
+              <div style={{ fontSize: 11, color: sub, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 8 }}>{t(lang, 'allocation')}</div>
+              <AllocationStrip segments={PORTFOLIO.allocation[lang]} height={6} showLabels={false}/>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 16px', marginTop: 10 }}>
+                {PORTFOLIO.allocation[lang].map(s => (
+                  <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ width: 7, height: 7, borderRadius: 999, background: s.color, flexShrink: 0 }}/>
+                    <span style={{ fontSize: 12, color: sub, fontWeight: 500 }}>{s.label}</span>
+                    <span style={{ fontFamily: SC.fontMono, fontSize: 12, fontWeight: 600, color: text }}>{s.pct}%</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}

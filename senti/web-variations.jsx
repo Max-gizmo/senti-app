@@ -235,7 +235,7 @@ function WebV1Green({ lang = 'ru', setLang = () => {}, onNav, active = 'home' })
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', background: SC.paper, overflow: 'hidden' }}>
         <WebTopBar lang={lang} setLang={setLang}/>
 
-        <div style={{ flex: 1, padding: '24px 32px 32px', overflow: 'hidden', display: 'grid', gridTemplateColumns: '1fr 320px', gridTemplateRows: 'auto 1fr', gap: 20 }}>
+        <div style={{ flex: 1, padding: '24px 32px 32px', overflowY: 'auto', display: 'grid', gridTemplateColumns: '1fr 320px', gridTemplateRows: 'auto auto', gap: 20, alignContent: 'start' }}>
           {/* Hero card — green wash */}
           <section style={{
             gridColumn: '1 / -1', gridRow: '1',
@@ -284,7 +284,7 @@ function WebV1Green({ lang = 'ru', setLang = () => {}, onNav, active = 'home' })
             gridColumn: '1', gridRow: '2',
             background: SC.paper, borderRadius: 24, padding: '20px 24px',
             border: `1px solid ${SC.ink200}`,
-            display: 'flex', flexDirection: 'column', overflow: 'hidden',
+            display: 'flex', flexDirection: 'column',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
               <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-0.3px' }}>{t(lang, 'assets')}</h3>
@@ -339,7 +339,7 @@ function WebV1Green({ lang = 'ru', setLang = () => {}, onNav, active = 'home' })
           </section>
 
           {/* Right rail */}
-          <aside style={{ gridColumn: '2', gridRow: '2', display: 'flex', flexDirection: 'column', gap: 16, overflow: 'hidden' }}>
+          <aside style={{ gridColumn: '2', gridRow: '2', display: 'flex', flexDirection: 'column', gap: 16 }}>
             {/* Allocation card with donut */}
             <div style={{ background: SC.paper, borderRadius: 24, padding: 20, border: `1px solid ${SC.ink200}` }}>
               <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: '-0.2px', marginBottom: 14 }}>{t(lang, 'allocation')}</div>
@@ -397,7 +397,7 @@ function WebV2Minimal({ lang = 'ru', setLang = () => {}, onNav, active = 'home' 
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', background: SC.paper, overflow: 'hidden' }}>
         <WebTopBar lang={lang} setLang={setLang}/>
 
-        <div style={{ flex: 1, padding: '40px 56px 40px', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 32 }}>
+        <div style={{ flex: 1, padding: '40px 56px 40px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 32 }}>
           {/* Eyebrow */}
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
             <div>
@@ -450,7 +450,7 @@ function WebV2Minimal({ lang = 'ru', setLang = () => {}, onNav, active = 'home' 
           </section>
 
           {/* 2-column structure (news moved to Home) */}
-          <section style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 64, flex: 1, minHeight: 0, overflow: 'hidden' }}>
+          <section style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 64 }}>
             {/* Holdings column */}
             <div>
               <div style={{ fontSize: 11, color: SC.ink500, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 16 }}>{t(lang, 'assets')}</div>
@@ -493,7 +493,7 @@ function WebV3Dark({ lang = 'ru', setLang = () => {}, onNav, active = 'home' }) 
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', background: SC.ink1000, overflow: 'hidden' }}>
         <WebTopBar lang={lang} setLang={setLang} dark/>
 
-        <div style={{ flex: 1, padding: '24px 32px 32px', overflow: 'hidden', display: 'grid', gridTemplateColumns: '1fr 320px', gridTemplateRows: 'auto 1fr', gap: 20 }}>
+        <div style={{ flex: 1, padding: '24px 32px 32px', overflowY: 'auto', display: 'grid', gridTemplateColumns: '1fr 320px', gridTemplateRows: 'auto auto', gap: 20, alignContent: 'start' }}>
           {/* Hero — black with subtle gradient */}
           <section style={{
             gridColumn: '1 / -1', gridRow: '1',
@@ -551,7 +551,7 @@ function WebV3Dark({ lang = 'ru', setLang = () => {}, onNav, active = 'home' }) 
             gridColumn: '1', gridRow: '2',
             background: SC.ink900, borderRadius: 24, padding: '20px 24px',
             border: '1px solid rgba(255,255,255,0.05)',
-            display: 'flex', flexDirection: 'column', overflow: 'hidden',
+            display: 'flex', flexDirection: 'column',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
               <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-0.3px', color: '#fff' }}>{t(lang, 'assets')}</h3>
@@ -604,7 +604,7 @@ function WebV3Dark({ lang = 'ru', setLang = () => {}, onNav, active = 'home' }) 
           </section>
 
           {/* Right rail */}
-          <aside style={{ gridColumn: '2', gridRow: '2', display: 'flex', flexDirection: 'column', gap: 16, overflow: 'hidden' }}>
+          <aside style={{ gridColumn: '2', gridRow: '2', display: 'flex', flexDirection: 'column', gap: 16 }}>
             {/* Allocation donut */}
             <div style={{ background: SC.ink900, borderRadius: 24, padding: 20, border: '1px solid rgba(255,255,255,0.05)' }}>
               <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', letterSpacing: '-0.2px', marginBottom: 14 }}>{t(lang, 'allocation')}</div>
