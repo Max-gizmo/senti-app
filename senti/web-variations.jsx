@@ -227,12 +227,12 @@ function Donut({ segments, size = 160, thickness = 22, gap = 2, dark = false }) 
 function WebV1Green({ lang = 'ru', setLang = () => {}, onNav, active = 'home' }) {
   return (
     <div data-screen-label={`Web / V1 Green / ${lang}`} style={{
-      width: 1440, height: 900, background: SC.bg2 || SC.ink50,
-      display: 'flex', fontFamily: SC.fontDisplay, color: SC.ink1000,
-      overflow: 'hidden',
+      display: 'flex', flex: 1, minWidth: 0, minHeight: 0,
+      background: SC.bg2 || SC.ink50,
+      fontFamily: SC.fontDisplay, color: SC.ink1000,
     }}>
       <WebSidebar lang={lang} onNav={onNav} active={active}/>
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', background: SC.paper, overflow: 'hidden' }}>
+      <main style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', background: SC.paper, overflow: 'hidden' }}>
         <WebTopBar lang={lang} setLang={setLang}/>
 
         <div style={{ flex: 1, padding: '24px 32px 32px', overflowY: 'auto', display: 'grid', gridTemplateColumns: '1fr 320px', gridTemplateRows: 'auto auto', gap: 20, alignContent: 'start' }}>
@@ -264,7 +264,7 @@ function WebV1Green({ lang = 'ru', setLang = () => {}, onNav, active = 'home' })
               </div>
             </div>
             {/* Big chart on hero */}
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative', minWidth: 0, overflow: 'hidden' }}>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6, marginBottom: 8 }}>
                 {['1Д','7Д','1М','3М','1Г'].map((p, i) => (
                   <span key={p} style={{
@@ -390,11 +390,12 @@ function WebV1Green({ lang = 'ru', setLang = () => {}, onNav, active = 'home' })
 function WebV2Minimal({ lang = 'ru', setLang = () => {}, onNav, active = 'home' }) {
   return (
     <div data-screen-label={`Web / V2 Minimal / ${lang}`} style={{
-      width: 1440, height: 900, background: SC.paper,
-      display: 'flex', fontFamily: SC.fontDisplay, color: SC.ink1000, overflow: 'hidden',
+      display: 'flex', flex: 1, minWidth: 0, minHeight: 0,
+      background: SC.paper,
+      fontFamily: SC.fontDisplay, color: SC.ink1000,
     }}>
       <WebSidebar lang={lang} onNav={onNav} active={active}/>
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', background: SC.paper, overflow: 'hidden' }}>
+      <main style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', background: SC.paper, overflow: 'hidden' }}>
         <WebTopBar lang={lang} setLang={setLang}/>
 
         <div style={{ flex: 1, padding: '40px 56px 40px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 32 }}>
@@ -486,11 +487,12 @@ function WebV2Minimal({ lang = 'ru', setLang = () => {}, onNav, active = 'home' 
 function WebV3Dark({ lang = 'ru', setLang = () => {}, onNav, active = 'home' }) {
   return (
     <div data-screen-label={`Web / V3 Dark / ${lang}`} style={{
-      width: 1440, height: 900, background: SC.ink1000,
-      display: 'flex', fontFamily: SC.fontDisplay, color: '#fff', overflow: 'hidden',
+      display: 'flex', flex: 1, minWidth: 0, minHeight: 0,
+      background: SC.ink1000,
+      fontFamily: SC.fontDisplay, color: '#fff',
     }}>
       <WebSidebar lang={lang} dark onNav={onNav} active={active}/>
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', background: SC.ink1000, overflow: 'hidden' }}>
+      <main style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', background: SC.ink1000, overflow: 'hidden' }}>
         <WebTopBar lang={lang} setLang={setLang} dark/>
 
         <div style={{ flex: 1, padding: '24px 32px 32px', overflowY: 'auto', display: 'grid', gridTemplateColumns: '1fr 320px', gridTemplateRows: 'auto auto', gap: 20, alignContent: 'start' }}>
@@ -531,7 +533,7 @@ function WebV3Dark({ lang = 'ru', setLang = () => {}, onNav, active = 'home' }) 
                 <Pill variant="softDark" size="md" icon="upload">{t(lang, 'withdraw')}</Pill>
               </div>
             </div>
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative', minWidth: 0, overflow: 'hidden' }}>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6, marginBottom: 8 }}>
                 {(lang === 'ru' ? ['1Д','7Д','1М','3М','1Г'] : ['1D','7D','1M','3M','1Y']).map((p, i) => (
                   <span key={p} style={{
