@@ -680,26 +680,92 @@ function WebInvestmentIdeas({ lang = 'ru', dark = false }) {
             <Pill variant="primary" size="md" arrow>{lang === 'ru' ? 'Начать' : 'Start'}</Pill>
           </div>
         </div>
-        {/* Right rail: News (moved from Portfolio) */}
-        <aside>
-          <div style={{ fontSize: 11, color: sub, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>
-            {t(lang, 'news')}
-          </div>
-          <div style={{ background: cardBg, borderRadius: 22, border, padding: '6px 18px' }}>
-            {news.map((n, i, arr) => (
-              <div key={i} style={{
-                padding: '14px 0',
-                borderBottom: i === arr.length - 1 ? 'none' : border,
-                cursor: 'pointer',
-              }}>
-                <div style={{ display: 'inline-block', padding: '2px 7px', borderRadius: 999, background: dark ? 'rgba(255,255,255,0.07)' : SC.ink100, color: sub, fontSize: 10, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 6 }}>{n.tag}</div>
-                <div style={{ fontSize: 13, fontWeight: 500, color: text, letterSpacing: '-0.2px', lineHeight: 1.35, marginBottom: 4 }}>{n.title}</div>
-                <div style={{ fontSize: 11, color: sub, fontFamily: SC.fontMono }}>{n.meta}</div>
-              </div>
-            ))}
+        {/* Right rail: live crypto prices + news */}
+        <aside style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Live crypto widget */}
+          {typeof useBinancePrices === 'function' && (
+            <LiveCryptoPrices lang={lang} dark={dark}/>
+          )}
+          <div>
+            <div style={{ fontSize: 11, color: sub, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>
+              {t(lang, 'news')}
+            </div>
+            <div style={{ background: cardBg, borderRadius: 22, border, padding: '6px 18px' }}>
+              {news.map((n, i, arr) => (
+                <div key={i} style={{
+                  padding: '14px 0',
+                  borderBottom: i === arr.length - 1 ? 'none' : border,
+                  cursor: 'pointer',
+                }}>
+                  <div style={{ display: 'inline-block', padding: '2px 7px', borderRadius: 999, background: dark ? 'rgba(255,255,255,0.07)' : SC.ink100, color: sub, fontSize: 10, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 6 }}>{n.tag}</div>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: text, letterSpacing: '-0.2px', lineHeight: 1.35, marginBottom: 4 }}>{n.title}</div>
+                  <div style={{ fontSize: 11, color: sub, fontFamily: SC.fontMono }}>{n.meta}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </aside>
       </section>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// LiveCryptoPrices — compact widget for home screen right rail
+// ─────────────────────────────────────────────────────────────
+const LIVE_CRYPTO_LIST = [
+  { symbol: 'BTC',  name: 'Bitcoin',  binance: 'BTCUSDT' },
+  { symbol: 'ETH',  name: 'Ethereum', binance: 'ETHUSDT' },
+  { symbol: 'BNB',  name: 'BNB',      binance: 'BNBUSDT' },
+  { symbol: 'SOL',  name: 'Solana',   binance: 'SOLUSDT' },
+];
+
+function LiveCryptoPrices({ lang = 'ru', dark = false }) {
+  const { prices, loading, error } = useBinancePrices(LIVE_CRYPTO_LIST.map(a => a.binance));
+  const text = dark ? '#fff' : SC.ink1000;
+  const sub  = dark ? 'rgba(255,255,255,0.5)' : SC.ink500;
+  const cardBg = dark ? SC.ink900 : SC.paper;
+  const border = dark ? '1px solid rgba(255,255,255,0.06)' : `1px solid ${SC.ink200}`;
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <div style={{ fontSize: 11, color: sub, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          {lang === 'ru' ? 'Крипто · Binance' : 'Crypto · Binance'}
+        </div>
+        {typeof BinanceStatusBadge === 'function' && (
+          <BinanceStatusBadge loading={loading} error={error} dark={dark}/>
+        )}
+      </div>
+      <div style={{ background: cardBg, borderRadius: 22, border, padding: '6px 18px' }}>
+        {LIVE_CRYPTO_LIST.map((asset, i) => {
+          const live = prices[asset.binance];
+          const price  = live ? live.price  : null;
+          const change = live ? live.change : null;
+          return (
+            <div key={asset.symbol} style={{
+              display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0',
+              borderBottom: i === LIVE_CRYPTO_LIST.length - 1 ? 'none' : border,
+            }}>
+              <TickerLogo symbol={asset.symbol} size={32}/>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: text, letterSpacing: '-0.2px' }}>{asset.symbol}</div>
+                <div style={{ fontSize: 11, color: sub }}>{asset.name}</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontFamily: SC.fontMono, fontSize: 13, fontWeight: 600, color: text }}>
+                  {price !== null
+                    ? `$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: price > 100 ? 2 : 4 })}`
+                    : <span style={{ color: sub }}>…</span>}
+                </div>
+                <div style={{ marginTop: 2 }}>
+                  {change !== null ? <DeltaPill value={change} size="sm"/> : null}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

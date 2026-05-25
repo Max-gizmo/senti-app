@@ -480,6 +480,11 @@ function WebV2Minimal({ lang = 'ru', setLang = () => {}, onNav, active = 'home' 
             </div>
             {/* News column moved to Home; portfolio keeps only assets + allocation */}
           </section>
+
+          {/* Binance account card — below the 2-col section */}
+          {typeof BinanceAccountCard === 'function' && (
+            <BinanceAccountCard lang={lang} dark={false}/>
+          )}
         </div>
       </main>
     </div>
@@ -648,6 +653,11 @@ function WebV3Dark({ lang = 'ru', setLang = () => {}, onNav, active = 'home' }) 
                 padding: '8px 16px', borderRadius: 999, fontSize: 12, fontWeight: 600, fontFamily: SC.fontDisplay,
               }}>{lang === 'ru' ? 'Подробнее' : 'Read more'} →</button>
             </div>
+
+            {/* Binance account card */}
+            {typeof BinanceAccountCard === 'function' && (
+              <BinanceAccountCard lang={lang} dark={true}/>
+            )}
           </aside>
         </div>
       </main>
