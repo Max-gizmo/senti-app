@@ -33,25 +33,45 @@ const MARKETS_ALL = [
   { symbol: 'COPP',  name: 'Copper',      cls: 'comm',   ccy: '$', price:     4.62, change:  0.3, spark: [4.59,4.60,4.61,4.62,4.61,4.62,4.62] },
 ];
 
+// Crypto assets for Markets — live prices from Binance
+const MOBILE_CRYPTO_ASSETS = [
+  { symbol: 'BTC',  name: 'Bitcoin',  binance: 'BTCUSDT', ccy: '$', cls: 'crypto' },
+  { symbol: 'ETH',  name: 'Ethereum', binance: 'ETHUSDT', ccy: '$', cls: 'crypto' },
+  { symbol: 'BNB',  name: 'BNB',      binance: 'BNBUSDT', ccy: '$', cls: 'crypto' },
+  { symbol: 'SOL',  name: 'Solana',   binance: 'SOLUSDT', ccy: '$', cls: 'crypto' },
+  { symbol: 'XRP',  name: 'XRP',      binance: 'XRPUSDT', ccy: '$', cls: 'crypto' },
+  { symbol: 'DOGE', name: 'Dogecoin', binance: 'DOGEUSDT',ccy: '$', cls: 'crypto' },
+];
+
 function MarketsScreen({ lang = 'ru', onAsset, dark = false }) {
   const [cls, setCls] = React.useState('forex');
+  const { prices: livePrices, loading: pricesLoading, error: pricesError } =
+    typeof useBinancePrices === 'function'
+      ? useBinancePrices(MOBILE_CRYPTO_ASSETS.map(a => a.binance))
+      : { prices: {}, loading: false, error: null };
+
   const tabs = [
-    { id: 'forex',  label: lang === 'ru' ? 'Валюта'     : 'Currency' },
+    { id: 'forex',  label: lang === 'ru' ? 'Валюта'  : 'Currency' },
     { id: 'cfd',    label: 'CFD' },
     { id: 'kg',     label: 'KG' },
-    { id: 'crypto', label: lang === 'ru' ? 'Крипто'      : 'Crypto' },
+    { id: 'crypto', label: lang === 'ru' ? 'Крипто'  : 'Crypto' },
     { id: 'fx',     label: 'Fx' },
-    { id: 'comm',   label: lang === 'ru' ? 'Товары'      : 'Commodities' },
+    { id: 'comm',   label: lang === 'ru' ? 'Товары'  : 'Commodities' },
   ];
   const filtered = MARKETS_ALL.filter(m => m.cls === cls);
   const bg = dark ? SC.ink1000 : SC.paper;
   const text = dark ? '#fff' : SC.ink1000;
   const sub = dark ? 'rgba(255,255,255,0.5)' : SC.ink500;
   const fieldBg = dark ? 'rgba(255,255,255,0.05)' : SC.ink50;
+  const border = dark ? '1px solid rgba(255,255,255,0.06)' : `1px solid ${SC.ink200}`;
+
   return (
     <div style={{ position: 'absolute', inset: 0, background: bg, display: 'flex', flexDirection: 'column', color: text, overflow: 'hidden' }}>
-      <div style={{ padding: '64px 20px 12px' }}>
+      <div style={{ padding: '64px 20px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h1 style={{ margin: 0, fontSize: 28, fontWeight: 600, letterSpacing: '-0.04em', fontFamily: SC.fontDisplay }}>{t(lang, 'markets')}</h1>
+        {cls === 'crypto' && typeof BinanceStatusBadge === 'function' && (
+          <BinanceStatusBadge loading={pricesLoading} error={pricesError} dark={dark}/>
+        )}
       </div>
       {/* Search */}
       <div style={{ padding: '4px 20px 12px' }}>
@@ -77,7 +97,47 @@ function MarketsScreen({ lang = 'ru', onAsset, dark = false }) {
       </div>
       {/* List */}
       <div style={{ flex: 1, padding: '4px 20px 96px', overflowY: 'auto' }}>
-        {filtered.map((h, i) => (
+        {/* Crypto tab — live Binance data */}
+        {cls === 'crypto' && MOBILE_CRYPTO_ASSETS.map((asset, i) => {
+          const live = livePrices[asset.binance];
+          const price  = live ? live.price  : null;
+          const change = live ? live.change : 0;
+          // build a fake directional spark from change sign while live data loads
+          const spark = live
+            ? (change >= 0
+                ? [100,101,100,102,101,103,102,104]
+                : [104,103,102,101,102,100,101,99])
+            : [100,100,100,100,100,100,100];
+          const h = { ...asset, price: price || 0, change, spark };
+          return (
+            <div key={asset.symbol} style={{
+              display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0',
+              borderBottom: i === MOBILE_CRYPTO_ASSETS.length - 1 ? 'none' : border,
+              cursor: 'pointer',
+            }} onClick={() => onAsset && onAsset(h)}>
+              <TickerLogo symbol={asset.symbol} size={40}/>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: '-0.2px', color: text }}>{asset.symbol}</div>
+                <div style={{ fontSize: 12, color: sub }}>{asset.name}</div>
+              </div>
+              <Sparkline data={spark} width={56} height={24}
+                color={change >= 0 ? SC.green : '#EF4444'}/>
+              <div style={{ textAlign: 'right', minWidth: 80 }}>
+                <div style={{ fontFamily: SC.fontMono, fontSize: 14, fontWeight: 600, color: text }}>
+                  {price !== null
+                    ? `$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: price > 100 ? 2 : 4 })}`
+                    : <span style={{ color: sub }}>…</span>}
+                </div>
+                <div style={{ marginTop: 2 }}>
+                  {live ? <DeltaPill value={change} size="sm"/> : null}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* All other tabs — mock data */}
+        {cls !== 'crypto' && filtered.map((h, i) => (
           <AssetRow key={h.symbol} {...h} sparkData={h.spark} priceCcy={h.ccy} dark={dark}
             onClick={() => onAsset && onAsset(h)}
             last={i === filtered.length - 1}/>
@@ -593,6 +653,12 @@ function MobileAssetsView({ lang = 'ru', dark = false, onAsset = () => {} }) {
                 ))}
               </div>
             </div>
+          </div>
+        )}
+        {/* Binance account card — shown only on portfolio tab */}
+        {tab === 'portfolio' && typeof BinanceAccountCard === 'function' && (
+          <div style={{ marginTop: 10 }}>
+            <BinanceAccountCard lang={lang} dark={dark}/>
           </div>
         )}
         {tab === 'orders' && (
