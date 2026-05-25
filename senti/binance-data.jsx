@@ -21,6 +21,19 @@ const CRYPTO_SYMBOLS = Object.entries(SYMBOL_MAP)
   .filter(([, v]) => v !== null)
   .map(([, v]) => v);
 
+// Futures symbols: stocks + commodities (USDT-M Futures on fapi.binance.com)
+const FUTURES_SYMBOLS = {
+  // Stocks (CFD)
+  AAPL:   { binance: 'AAPLUSDT',   name: 'Apple Inc.',  ccy: '$', cls: 'cfd' },
+  NVDA:   { binance: 'NVDAUSDT',   name: 'Nvidia',      ccy: '$', cls: 'cfd' },
+  TSLA:   { binance: 'TSLAUSDT',   name: 'Tesla',       ccy: '$', cls: 'cfd' },
+  GOOGL:  { binance: 'GOOGLUSDT',  name: 'Alphabet',    ccy: '$', cls: 'cfd' },
+  // Commodities
+  XAU:    { binance: 'XAUUSDT',    name: 'Gold',        ccy: '$', cls: 'comm' },
+  XAG:    { binance: 'XAGUSDT',    name: 'Silver',      ccy: '$', cls: 'comm' },
+  COPPER: { binance: 'COPPERUSDT', name: 'Copper',      ccy: '$', cls: 'comm' },
+};
+
 // ─────────────────────────────────────────────────────────────
 // useBinancePrices — fetches 24h ticker for a list of Binance pairs
 // Returns: { prices: { BTCUSDT: { price, change, high, low, volume } }, loading, error }
@@ -50,6 +63,55 @@ function useBinancePrices(symbols = CRYPTO_SYMBOLS, refreshMs = 15000) {
             volume:   parseFloat(t.volume),
             prevClose: parseFloat(t.prevClosePrice),
           };
+        });
+        setPrices(map);
+        setLoading(false);
+        setError(null);
+      } catch (e) {
+        if (alive) { setError(e.message); setLoading(false); }
+      }
+    }
+
+    load();
+    const timer = setInterval(load, refreshMs);
+    return () => { alive = false; clearInterval(timer); };
+  }, [symbols.join(','), refreshMs]);
+
+  return { prices, loading, error };
+}
+
+// ─────────────────────────────────────────────────────────────
+// useBinanceFutures — fetches 24h ticker from USDT-M Futures
+// Used for: stocks (AAPL/NVDA/TSLA/GOOGL) + commodities (XAU/XAG/COPPER)
+// Returns: { prices: { NVDAUSDT: { price, change, high, low, volume } }, loading, error }
+// ─────────────────────────────────────────────────────────────
+function useBinanceFutures(symbols, refreshMs = 15000) {
+  const [prices, setPrices] = React.useState({});
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError]   = React.useState(null);
+
+  React.useEffect(() => {
+    if (!symbols || symbols.length === 0) return;
+    let alive = true;
+
+    async function load() {
+      try {
+        const url = `${BINANCE_WORKER}/futures?symbols=${symbols.join(',')}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!alive) return;
+        const map = {};
+        data.forEach(t => {
+          if (!t.error) {
+            map[t.symbol] = {
+              price:  parseFloat(t.lastPrice),
+              change: parseFloat(t.priceChangePercent),
+              high:   parseFloat(t.highPrice),
+              low:    parseFloat(t.lowPrice),
+              volume: parseFloat(t.volume),
+            };
+          }
         });
         setPrices(map);
         setLoading(false);
@@ -203,7 +265,7 @@ function BinanceAccountCard({ lang = 'ru', dark = false }) {
 })();
 
 Object.assign(window, {
-  BINANCE_WORKER, SYMBOL_MAP, CRYPTO_SYMBOLS,
-  useBinancePrices, useBinanceAccount,
+  BINANCE_WORKER, SYMBOL_MAP, CRYPTO_SYMBOLS, FUTURES_SYMBOLS,
+  useBinancePrices, useBinanceFutures, useBinanceAccount,
   BinanceStatusBadge, BinanceAccountCard,
 });
