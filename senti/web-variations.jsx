@@ -377,6 +377,11 @@ function WebV1Green({ lang = 'ru', setLang = () => {}, onNav, active = 'home' })
                 padding: '8px 16px', borderRadius: 999, fontSize: 12, fontWeight: 600, fontFamily: SC.fontDisplay,
               }}>{lang === 'ru' ? 'Подробнее' : 'Read more'} →</button>
             </div>
+
+            {/* Binance account card */}
+            {typeof BinanceAccountCard === 'function' && (
+              <BinanceAccountCard lang={lang} dark={false}/>
+            )}
           </aside>
         </div>
       </main>

@@ -1,7 +1,70 @@
 // Web prototype extra screens — Markets table view, Asset detail, Exchange, History
 
+// Crypto assets list for Markets (live Binance prices replace mock data)
+const CRYPTO_ASSETS_BASE = [
+  { symbol: 'BTC',  name: 'Bitcoin',  binance: 'BTCUSDT', ccy: '$' },
+  { symbol: 'ETH',  name: 'Ethereum', binance: 'ETHUSDT', ccy: '$' },
+  { symbol: 'BNB',  name: 'BNB',      binance: 'BNBUSDT', ccy: '$' },
+  { symbol: 'SOL',  name: 'Solana',   binance: 'SOLUSDT', ccy: '$' },
+  { symbol: 'XRP',  name: 'XRP',      binance: 'XRPUSDT', ccy: '$' },
+  { symbol: 'DOGE', name: 'Dogecoin', binance: 'DOGEUSDT',ccy: '$' },
+];
+
+function CryptoRow({ asset, liveData, dark, border, sub, onAsset }) {
+  const live = liveData[asset.binance];
+  const price  = live ? live.price  : null;
+  const change = live ? live.change : null;
+  const volume = live ? live.volume : null;
+  const text = dark ? '#fff' : SC.ink1000;
+
+  return (
+    <div onClick={() => onAsset && onAsset({ ...asset, price: price || 0, change: change || 0, cls: 'crypto' })} style={{
+      display: 'grid', gridTemplateColumns: '2.2fr 1fr 1fr 1fr 1fr 0.8fr', gap: 12,
+      padding: '14px 4px', alignItems: 'center',
+      borderBottom: border, cursor: 'pointer',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <TickerLogo symbol={asset.symbol} size={36}/>
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: '-0.2px', color: text }}>{asset.symbol}</div>
+          <div style={{ fontSize: 12, color: sub }}>{asset.name}</div>
+        </div>
+      </div>
+      <div style={{ fontFamily: SC.fontMono, fontSize: 14, fontWeight: 600, textAlign: 'right', color: text }}>
+        {price !== null
+          ? `$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: price > 100 ? 2 : 4 })}`
+          : <span style={{ color: sub }}>…</span>}
+      </div>
+      <div style={{ textAlign: 'right' }}>
+        {change !== null ? <DeltaPill value={change}/> : <span style={{ color: sub, fontSize: 12 }}>…</span>}
+      </div>
+      <div style={{ fontFamily: SC.fontMono, fontSize: 13, color: sub, textAlign: 'right' }}>
+        {volume ? `$${(volume * (price || 0) / 1e6).toFixed(0)}M` : '—'}
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        {/* mini price bar — use change direction as sparkline proxy */}
+        {change !== null
+          ? <Sparkline data={change >= 0
+              ? [100,101,100,102,101,103,102,104]
+              : [104,103,102,101,102,100,101,99]}
+              width={80} height={28}
+              color={change >= 0 ? SC.green : '#EF4444'}/>
+          : null}
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <Pill variant={dark ? 'softDark' : 'soft'} size="sm">{t('ru', 'buy')} →</Pill>
+      </div>
+    </div>
+  );
+}
+
 function WebMarketsView({ lang = 'ru', dark = false, onAsset }) {
   const [cls, setCls] = React.useState('forex');
+  const { prices: livePrices, loading: pricesLoading, error: pricesError } =
+    typeof useBinancePrices === 'function'
+      ? useBinancePrices(CRYPTO_ASSETS_BASE.map(a => a.binance))
+      : { prices: {}, loading: false, error: null };
+
   const tabs = [
     { id: 'forex',  label: lang === 'ru' ? 'Валюта' : 'Currency' },
     { id: 'cfd',    label: 'CFD' },
@@ -17,7 +80,12 @@ function WebMarketsView({ lang = 'ru', dark = false, onAsset }) {
   const border = dark ? '1px solid rgba(255,255,255,0.06)' : `1px solid ${SC.ink200}`;
   return (
     <div style={{ padding: '24px 32px 32px', height: '100%', overflow: 'auto', color: text, fontFamily: SC.fontDisplay }}>
-      <h1 style={{ margin: '4px 0 18px', fontSize: 32, fontWeight: 600, letterSpacing: '-0.03em' }}>{t(lang, 'markets')}</h1>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
+        <h1 style={{ margin: 0, fontSize: 32, fontWeight: 600, letterSpacing: '-0.03em' }}>{t(lang, 'markets')}</h1>
+        {cls === 'crypto' && typeof BinanceStatusBadge === 'function' && (
+          <BinanceStatusBadge loading={pricesLoading} error={pricesError} dark={dark}/>
+        )}
+      </div>
       <div style={{ display: 'flex', gap: 8, marginBottom: 18 }}>
         {tabs.map(tg => (
           <button key={tg.id} onClick={() => setCls(tg.id)} style={{
@@ -38,7 +106,16 @@ function WebMarketsView({ lang = 'ru', dark = false, onAsset }) {
           <span style={{ textAlign: 'center' }}>{lang === 'ru' ? 'Тренд' : 'Trend'}</span>
           <span></span>
         </div>
-        {filtered.map((h, i, arr) => (
+
+        {/* Crypto tab — live Binance data */}
+        {cls === 'crypto' && CRYPTO_ASSETS_BASE.map((asset, i) => (
+          <CryptoRow key={asset.symbol} asset={asset} liveData={livePrices}
+            dark={dark} sub={sub} onAsset={onAsset}
+            border={i === CRYPTO_ASSETS_BASE.length - 1 ? 'none' : border}/>
+        ))}
+
+        {/* All other tabs — mock data */}
+        {cls !== 'crypto' && filtered.map((h, i, arr) => (
           <div key={h.symbol} onClick={() => onAsset && onAsset(h)} style={{
             display: 'grid', gridTemplateColumns: '2.2fr 1fr 1fr 1fr 1fr 0.8fr', gap: 12,
             padding: '14px 4px', alignItems: 'center',
@@ -57,7 +134,7 @@ function WebMarketsView({ lang = 'ru', dark = false, onAsset }) {
             </div>
             <div style={{ textAlign: 'right' }}><DeltaPill value={h.change}/></div>
             <div style={{ fontFamily: SC.fontMono, fontSize: 13, color: sub, textAlign: 'right' }}>
-              {h.cls === 'crypto' ? '128M' : h.cls === 'cfd' ? '3.2M' : h.cls === 'kg' ? '42K' : h.cls === 'fx' ? '1.4B' : h.cls === 'comm' ? '880K' : '—'}
+              {h.cls === 'cfd' ? '3.2M' : h.cls === 'kg' ? '42K' : h.cls === 'fx' ? '1.4B' : h.cls === 'comm' ? '880K' : '—'}
             </div>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <Sparkline data={h.spark} width={80} height={28}/>
