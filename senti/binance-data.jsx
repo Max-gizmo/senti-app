@@ -38,7 +38,7 @@ const FUTURES_SYMBOLS = {
 // useBinancePrices — fetches 24h ticker for a list of Binance pairs
 // Returns: { prices: { BTCUSDT: { price, change, high, low, volume } }, loading, error }
 // ─────────────────────────────────────────────────────────────
-function useBinancePrices(symbols = CRYPTO_SYMBOLS, refreshMs = 15000) {
+function useBinancePrices(symbols = CRYPTO_SYMBOLS, refreshMs = 600000) {
   const [prices, setPrices] = React.useState({});
   const [loading, setLoading] = React.useState(true);
   const [error, setError]   = React.useState(null);
@@ -85,7 +85,7 @@ function useBinancePrices(symbols = CRYPTO_SYMBOLS, refreshMs = 15000) {
 // Used for: stocks (AAPL/NVDA/TSLA/GOOGL) + commodities (XAU/XAG/COPPER)
 // Returns: { prices: { NVDAUSDT: { price, change, high, low, volume } }, loading, error }
 // ─────────────────────────────────────────────────────────────
-function useBinanceFutures(symbols, refreshMs = 15000) {
+function useBinanceFutures(symbols, refreshMs = 600000) {
   const [prices, setPrices] = React.useState({});
   const [loading, setLoading] = React.useState(true);
   const [error, setError]   = React.useState(null);
@@ -133,7 +133,7 @@ function useBinanceFutures(symbols, refreshMs = 15000) {
 // useBinanceAccount — fetches signed account balances
 // Returns: { balances: [{ asset, free, locked }], loading, error }
 // ─────────────────────────────────────────────────────────────
-function useBinanceAccount(refreshMs = 30000) {
+function useBinanceAccount(refreshMs = 600000) {
   const [balances, setBalances] = React.useState([]);
   const [loading, setLoading]  = React.useState(true);
   const [error, setError]      = React.useState(null);
