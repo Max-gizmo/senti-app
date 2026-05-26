@@ -693,6 +693,12 @@ function MobileAssetsView({ lang = 'ru', dark = false, onAsset = () => {} }) {
             <BinanceAccountCard lang={lang} dark={dark}/>
           </div>
         )}
+        {/* Bybit account card */}
+        {tab === 'portfolio' && typeof BybitAccountCard === 'function' && (
+          <div style={{ marginTop: 10 }}>
+            <BybitAccountCard lang={lang} dark={dark}/>
+          </div>
+        )}
         {tab === 'orders' && (
           <div style={{ display: 'flex', gap: 10 }}>
             <div style={{ flex: 1, padding: '12px 14px', borderRadius: 14, background: fieldBg }}>

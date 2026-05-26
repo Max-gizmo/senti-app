@@ -382,6 +382,10 @@ function WebV1Green({ lang = 'ru', setLang = () => {}, onNav, active = 'home' })
             {typeof BinanceAccountCard === 'function' && (
               <BinanceAccountCard lang={lang} dark={false}/>
             )}
+            {/* Bybit account card */}
+            {typeof BybitAccountCard === 'function' && (
+              <BybitAccountCard lang={lang} dark={false}/>
+            )}
           </aside>
         </div>
       </main>
@@ -484,6 +488,10 @@ function WebV2Minimal({ lang = 'ru', setLang = () => {}, onNav, active = 'home' 
           {/* Binance account card — below the 2-col section */}
           {typeof BinanceAccountCard === 'function' && (
             <BinanceAccountCard lang={lang} dark={false}/>
+          )}
+          {/* Bybit account card */}
+          {typeof BybitAccountCard === 'function' && (
+            <BybitAccountCard lang={lang} dark={false}/>
           )}
         </div>
       </main>
@@ -657,6 +665,10 @@ function WebV3Dark({ lang = 'ru', setLang = () => {}, onNav, active = 'home' }) 
             {/* Binance account card */}
             {typeof BinanceAccountCard === 'function' && (
               <BinanceAccountCard lang={lang} dark={true}/>
+            )}
+            {/* Bybit account card */}
+            {typeof BybitAccountCard === 'function' && (
+              <BybitAccountCard lang={lang} dark={true}/>
             )}
           </aside>
         </div>
