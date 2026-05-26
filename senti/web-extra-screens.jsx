@@ -1,33 +1,64 @@
 // Web prototype extra screens — Markets table view, Asset detail, Exchange, History
 
-// Assets with live Binance prices grouped by tab
+// Live asset definitions — crypto from Binance, CFD/comm from Bybit, forex/indices from Bybit Worker
 const LIVE_ASSETS = {
   crypto: [
-    { symbol: 'BTC',    name: 'Bitcoin',   binance: 'BTCUSDT',    ccy: '$', cls: 'crypto', src: 'spot' },
-    { symbol: 'ETH',    name: 'Ethereum',  binance: 'ETHUSDT',    ccy: '$', cls: 'crypto', src: 'spot' },
-    { symbol: 'BNB',    name: 'BNB',       binance: 'BNBUSDT',    ccy: '$', cls: 'crypto', src: 'spot' },
-    { symbol: 'SOL',    name: 'Solana',    binance: 'SOLUSDT',    ccy: '$', cls: 'crypto', src: 'spot' },
-    { symbol: 'XRP',    name: 'XRP',       binance: 'XRPUSDT',    ccy: '$', cls: 'crypto', src: 'spot' },
-    { symbol: 'DOGE',   name: 'Dogecoin',  binance: 'DOGEUSDT',   ccy: '$', cls: 'crypto', src: 'spot' },
+    { symbol: 'BTC',  name: 'Bitcoin',   binance: 'BTCUSDT',  ccy: '$', cls: 'crypto', src: 'Binance' },
+    { symbol: 'ETH',  name: 'Ethereum',  binance: 'ETHUSDT',  ccy: '$', cls: 'crypto', src: 'Binance' },
+    { symbol: 'BNB',  name: 'BNB',       binance: 'BNBUSDT',  ccy: '$', cls: 'crypto', src: 'Binance' },
+    { symbol: 'SOL',  name: 'Solana',    binance: 'SOLUSDT',  ccy: '$', cls: 'crypto', src: 'Binance' },
+    { symbol: 'XRP',  name: 'XRP',       binance: 'XRPUSDT',  ccy: '$', cls: 'crypto', src: 'Binance' },
+    { symbol: 'ADA',  name: 'Cardano',   binance: 'ADAUSDT',  ccy: '$', cls: 'crypto', src: 'Binance' },
+    { symbol: 'DOGE', name: 'Dogecoin',  binance: 'DOGEUSDT', ccy: '$', cls: 'crypto', src: 'Binance' },
   ],
+  // CFD stocks — Bybit linear futures
   cfd: [
-    { symbol: 'AAPL',  name: 'Apple Inc.',  binance: 'AAPLUSDT',  ccy: '$', cls: 'cfd', src: 'futures' },
-    { symbol: 'NVDA',  name: 'Nvidia',      binance: 'NVDAUSDT',  ccy: '$', cls: 'cfd', src: 'futures' },
-    { symbol: 'TSLA',  name: 'Tesla',       binance: 'TSLAUSDT',  ccy: '$', cls: 'cfd', src: 'futures' },
-    { symbol: 'GOOGL', name: 'Alphabet',    binance: 'GOOGLUSDT', ccy: '$', cls: 'cfd', src: 'futures' },
+    { symbol: 'AAPL',  name: 'Apple Inc.',  bybit: 'AAPLUSDT',  ccy: '$', cls: 'cfd', src: 'Bybit' },
+    { symbol: 'NVDA',  name: 'Nvidia',      bybit: 'NVDAUSDT',  ccy: '$', cls: 'cfd', src: 'Bybit' },
+    { symbol: 'TSLA',  name: 'Tesla',       bybit: 'TSLAUSDT',  ccy: '$', cls: 'cfd', src: 'Bybit' },
+    { symbol: 'GOOGL', name: 'Alphabet',    bybit: 'GOOGLUSDT', ccy: '$', cls: 'cfd', src: 'Bybit' },
+    { symbol: 'AMZN',  name: 'Amazon',      bybit: 'AMZNUSDT',  ccy: '$', cls: 'cfd', src: 'Bybit' },
+    { symbol: 'META',  name: 'Meta',        bybit: 'METAUSDT',  ccy: '$', cls: 'cfd', src: 'Bybit' },
+    { symbol: 'MSFT',  name: 'Microsoft',   bybit: 'MSFTUSDT',  ccy: '$', cls: 'cfd', src: 'Bybit' },
   ],
+  // Commodities — Bybit linear futures
   comm: [
-    { symbol: 'XAU',    name: 'Gold',        binance: 'XAUUSDT',    ccy: '$', cls: 'comm', src: 'futures' },
-    { symbol: 'XAG',    name: 'Silver',      binance: 'XAGUSDT',    ccy: '$', cls: 'comm', src: 'futures' },
-    { symbol: 'COPPER', name: 'Copper',      binance: 'COPPERUSDT', ccy: '$', cls: 'comm', src: 'futures' },
+    { symbol: 'XAU', name: 'Gold',   bybit: 'XAUUSDT', ccy: '$', cls: 'comm', src: 'Bybit' },
+    { symbol: 'XAG', name: 'Silver', bybit: 'XAGUSDT', ccy: '$', cls: 'comm', src: 'Bybit' },
+  ],
+  // Forex pairs — Bybit Worker (frankfurter.app + open.er-api.com)
+  forex: [
+    { symbol: 'EURUSD', name: 'Euro / USD',   ccy: '$',  cls: 'fx', src: 'Forex' },
+    { symbol: 'GBPUSD', name: 'Pound / USD',  ccy: '$',  cls: 'fx', src: 'Forex' },
+    { symbol: 'USDJPY', name: 'USD / Yen',    ccy: '¥',  cls: 'fx', src: 'Forex' },
+    { symbol: 'USDCHF', name: 'USD / Franc',  ccy: 'Fr', cls: 'fx', src: 'Forex' },
+    { symbol: 'AUDUSD', name: 'AUD / USD',    ccy: '$',  cls: 'fx', src: 'Forex' },
+    { symbol: 'USDCAD', name: 'USD / CAD',    ccy: 'C$', cls: 'fx', src: 'Forex' },
+    { symbol: 'NZDUSD', name: 'NZD / USD',    ccy: '$',  cls: 'fx', src: 'Forex' },
+    { symbol: 'USDKGS', name: 'USD / KGS',    ccy: 'с',  cls: 'fx', src: 'Forex' },
+    { symbol: 'EURKGS', name: 'EUR / KGS',    ccy: 'с',  cls: 'fx', src: 'Forex' },
+    { symbol: 'RUBKGS', name: 'RUB / KGS',    ccy: 'с',  cls: 'fx', src: 'Forex' },
+  ],
+  // World indices — Bybit Worker (stooq.com)
+  indices: [
+    { symbol: 'SPX', name: 'S&P 500',    cls: 'idx', src: 'Index', region: 'us' },
+    { symbol: 'NDQ', name: 'NASDAQ 100', cls: 'idx', src: 'Index', region: 'us' },
+    { symbol: 'DJI', name: 'Dow Jones',  cls: 'idx', src: 'Index', region: 'us' },
+    { symbol: 'DAX', name: 'DAX 40',     cls: 'idx', src: 'Index', region: 'eu' },
+    { symbol: 'CAC', name: 'CAC 40',     cls: 'idx', src: 'Index', region: 'eu' },
+    { symbol: 'NKX', name: 'Nikkei 225', cls: 'idx', src: 'Index', region: 'jp' },
+    { symbol: 'SHC', name: 'Shanghai',   cls: 'idx', src: 'Index', region: 'cn' },
+    { symbol: 'HSI', name: 'Hang Seng',  cls: 'idx', src: 'Index', region: 'hk' },
   ],
 };
 
-// Shared live row — works for spot (crypto) and futures (stocks/commodities)
+// Shared live row — works for all live asset types
 function LiveAssetRow({ asset, price, change, volume, dark, border, sub, lang, onAsset }) {
   const text = dark ? '#fff' : SC.ink1000;
-  const src = asset.src === 'futures' ? 'Futures' : 'Spot';
-  const fmtPrice = p => p > 1000
+  const src = asset.src || 'Live';
+  const fmtPrice = p => p > 10000
+    ? p.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+    : p > 1000
     ? p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     : p >= 1
     ? p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 })
@@ -75,27 +106,39 @@ function LiveAssetRow({ asset, price, change, volume, dark, border, sub, lang, o
 }
 
 function WebMarketsView({ lang = 'ru', dark = false, onAsset }) {
-  const [cls, setCls] = React.useState('forex');
+  const [cls, setCls] = React.useState('crypto');
 
-  const spotSymbols    = LIVE_ASSETS.crypto.map(a => a.binance);
-  const futuresSymbols = [...LIVE_ASSETS.cfd, ...LIVE_ASSETS.comm].map(a => a.binance);
+  // Binance: crypto spot prices
+  const spotSymbols = LIVE_ASSETS.crypto.map(a => a.binance);
+  const { prices: spotPrices, loading: spotLoading, error: spotError } =
+    typeof useBinancePrices === 'function' ? useBinancePrices(spotSymbols) : { prices: {}, loading: false, error: null };
 
-  const { prices: spotPrices,    loading: spotLoading,    error: spotError }    =
-    typeof useBinancePrices  === 'function' ? useBinancePrices(spotSymbols)    : { prices: {}, loading: false, error: null };
-  const { prices: futuresPrices, loading: futuresLoading, error: futuresError } =
-    typeof useBinanceFutures === 'function' ? useBinanceFutures(futuresSymbols) : { prices: {}, loading: false, error: null };
+  // Bybit: CFD + commodities futures
+  const bybitFutSymbols = [...LIVE_ASSETS.cfd, ...LIVE_ASSETS.comm].map(a => a.bybit);
+  const { prices: bybitFutPrices, loading: bybitFutLoading, error: bybitFutError } =
+    typeof useBybitFutures === 'function' ? useBybitFutures(bybitFutSymbols) : { prices: {}, loading: false, error: null };
 
-  const isLiveTab = ['crypto', 'cfd', 'comm'].includes(cls);
-  const liveLoading = cls === 'crypto' ? spotLoading : futuresLoading;
-  const liveError   = cls === 'crypto' ? spotError   : futuresError;
+  // Bybit Worker: forex rates
+  const { prices: forexPrices, loading: forexLoading, error: forexError } =
+    typeof useBybitForex === 'function' ? useBybitForex() : { prices: {}, loading: false, error: null };
+
+  // Bybit Worker: world indices
+  const { prices: idxPrices, loading: idxLoading, error: idxError } =
+    typeof useBybitIndices === 'function' ? useBybitIndices() : { prices: {}, loading: false, error: null };
+
+  const LIVE_TABS = ['crypto', 'cfd', 'comm', 'fx', 'idx'];
+  const isLiveTab = LIVE_TABS.includes(cls);
+  const liveLoading = cls === 'crypto' ? spotLoading : cls === 'fx' ? forexLoading : cls === 'idx' ? idxLoading : bybitFutLoading;
+  const liveError   = cls === 'crypto' ? spotError   : cls === 'fx' ? forexError   : cls === 'idx' ? idxError   : bybitFutError;
 
   const tabs = [
-    { id: 'forex',  label: lang === 'ru' ? 'Валюта' : 'Currency' },
+    { id: 'crypto', label: lang === 'ru' ? 'Крипто'   : 'Crypto' },
     { id: 'cfd',    label: 'CFD' },
+    { id: 'comm',   label: lang === 'ru' ? 'Товары'   : 'Comm.' },
+    { id: 'fx',     label: lang === 'ru' ? 'Форекс'   : 'Forex' },
+    { id: 'idx',    label: lang === 'ru' ? 'Индексы'  : 'Indices' },
+    { id: 'forex',  label: lang === 'ru' ? 'Валюта'   : 'Currency' },
     { id: 'kg',     label: 'KG' },
-    { id: 'crypto', label: lang === 'ru' ? 'Крипто' : 'Crypto' },
-    { id: 'fx',     label: 'Fx' },
-    { id: 'comm',   label: lang === 'ru' ? 'Товары' : 'Commodities' },
   ];
   const filtered = MARKETS_ALL.filter(m => m.cls === cls);
   const text = dark ? '#fff' : SC.ink1000;
@@ -103,15 +146,27 @@ function WebMarketsView({ lang = 'ru', dark = false, onAsset }) {
   const cardBg = dark ? SC.ink900 : SC.paper;
   const border = dark ? '1px solid rgba(255,255,255,0.06)' : `1px solid ${SC.ink200}`;
 
+  // Status badge source label
+  const srcLabel = cls === 'crypto' ? 'Binance' : cls === 'fx' || cls === 'idx' ? 'Bybit' : 'Bybit';
+
   return (
     <div style={{ padding: '24px 32px 32px', height: '100%', overflow: 'auto', color: text, fontFamily: SC.fontDisplay }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
         <h1 style={{ margin: 0, fontSize: 32, fontWeight: 600, letterSpacing: '-0.03em' }}>{t(lang, 'markets')}</h1>
-        {isLiveTab && typeof BinanceStatusBadge === 'function' && (
-          <BinanceStatusBadge loading={liveLoading} error={liveError} dark={dark}/>
+        {isLiveTab && liveLoading === false && !liveError && (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '2px 8px', borderRadius: 999,
+            background: dark ? 'rgba(255,255,255,0.06)' : SC.ink100,
+            fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', color: dark ? 'rgba(255,255,255,0.6)' : SC.ink500, fontFamily: SC.fontMono }}>
+            <span style={{ width: 6, height: 6, borderRadius: 999, background: SC.green,
+              boxShadow: `0 0 6px ${SC.green}`, animation: 'binance-pulse 2s ease-in-out infinite' }}/>
+            {srcLabel} live
+          </span>
+        )}
+        {isLiveTab && liveLoading && (
+          <span style={{ fontSize: 11, color: sub, fontFamily: SC.fontMono }}>…</span>
         )}
       </div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 18 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' }}>
         {tabs.map(tg => (
           <button key={tg.id} onClick={() => setCls(tg.id)} style={{
             background: cls === tg.id ? (dark ? '#fff' : SC.ink1000) : (dark ? 'rgba(255,255,255,0.06)' : SC.ink100),
@@ -134,29 +189,47 @@ function WebMarketsView({ lang = 'ru', dark = false, onAsset }) {
           <span></span>
         </div>
 
-        {/* Live tabs: Crypto (spot), CFD (futures), Commodities (futures) */}
+        {/* Crypto — Binance spot */}
         {cls === 'crypto' && LIVE_ASSETS.crypto.map((asset, i, arr) => {
           const live = spotPrices[asset.binance] || {};
           return <LiveAssetRow key={asset.symbol} asset={asset} lang={lang} dark={dark} sub={sub}
             price={live.price} change={live.change} volume={live.volume} onAsset={onAsset}
             border={i === arr.length - 1 ? 'none' : border}/>;
         })}
+        {/* CFD stocks — Bybit futures */}
         {cls === 'cfd' && LIVE_ASSETS.cfd.map((asset, i, arr) => {
-          const live = futuresPrices[asset.binance] || {};
+          const live = bybitFutPrices[asset.bybit] || {};
           return <LiveAssetRow key={asset.symbol} asset={asset} lang={lang} dark={dark} sub={sub}
             price={live.price} change={live.change} volume={live.volume} onAsset={onAsset}
             border={i === arr.length - 1 ? 'none' : border}/>;
         })}
+        {/* Commodities — Bybit futures */}
         {cls === 'comm' && LIVE_ASSETS.comm.map((asset, i, arr) => {
-          const live = futuresPrices[asset.binance] || {};
+          const live = bybitFutPrices[asset.bybit] || {};
           return <LiveAssetRow key={asset.symbol} asset={asset} lang={lang} dark={dark} sub={sub}
             price={live.price} change={live.change} volume={live.volume} onAsset={onAsset}
+            border={i === arr.length - 1 ? 'none' : border}/>;
+        })}
+        {/* Forex — Bybit Worker (frankfurter + open.er-api) */}
+        {cls === 'fx' && LIVE_ASSETS.forex.map((asset, i, arr) => {
+          const live = forexPrices[asset.symbol] || {};
+          return <LiveAssetRow key={asset.symbol} asset={asset} lang={lang} dark={dark} sub={sub}
+            price={live.price} change={live.change} volume={null} onAsset={onAsset}
+            border={i === arr.length - 1 ? 'none' : border}/>;
+        })}
+        {/* World indices — Bybit Worker (stooq) */}
+        {cls === 'idx' && LIVE_ASSETS.indices.map((asset, i, arr) => {
+          const live = idxPrices[asset.symbol] || {};
+          const regionFlag = { us: '🇺🇸', eu: '🇪🇺', jp: '🇯🇵', cn: '🇨🇳', hk: '🇭🇰' }[live.region || asset.region] || '';
+          const assetWithName = { ...asset, name: `${regionFlag} ${live.name || asset.name}` };
+          return <LiveAssetRow key={asset.symbol} asset={assetWithName} lang={lang} dark={dark} sub={sub}
+            price={live.price} change={live.change} volume={null} onAsset={onAsset}
             border={i === arr.length - 1 ? 'none' : border}/>;
         })}
 
-        {/* Static tabs: forex, kg, fx */}
-        {!['crypto','cfd','comm'].includes(cls) && filtered.map((h, i, arr) => (
-          <div key={h.symbol} onClick={() => onAsset && onAsset(h)} style={{
+        {/* Static tabs: forex (KGS), kg */}
+        {!LIVE_TABS.includes(cls) && filtered.map((h, i, arr) => (
+          <div key={h.symbol + i} onClick={() => onAsset && onAsset(h)} style={{
             display: 'grid', gridTemplateColumns: '2.2fr 1fr 1fr 1fr 1fr 0.8fr', gap: 12,
             padding: '14px 4px', alignItems: 'center',
             borderBottom: i === arr.length - 1 ? 'none' : border, cursor: 'pointer',
@@ -173,7 +246,7 @@ function WebMarketsView({ lang = 'ru', dark = false, onAsset }) {
             </div>
             <div style={{ textAlign: 'right' }}><DeltaPill value={h.change}/></div>
             <div style={{ fontFamily: SC.fontMono, fontSize: 13, color: sub, textAlign: 'right' }}>
-              {h.cls === 'kg' ? '42K' : h.cls === 'fx' ? '1.4B' : h.cls === 'forex' ? '2.1B' : '—'}
+              {h.cls === 'kg' ? '42K' : '—'}
             </div>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <Sparkline data={h.spark} width={80} height={28}/>

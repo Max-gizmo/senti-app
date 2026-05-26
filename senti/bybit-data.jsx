@@ -163,6 +163,83 @@ function useBybitAccount(refreshMs = 600000) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// useBybitForex — fetches major forex pairs + KGS rates
+// Returns: { prices: { EURUSD: { price, change, ccy, name, group } }, loading, error }
+// Source: frankfurter.app (major) + open.er-api.com (KGS/RUB)
+// ─────────────────────────────────────────────────────────────
+function useBybitForex(refreshMs = 600000) {
+  const [prices, setPrices] = React.useState({});
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError]   = React.useState(null);
+
+  React.useEffect(() => {
+    let alive = true;
+    async function load() {
+      try {
+        const res  = await fetch(`${BYBIT_WORKER}/forex`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!alive) return;
+        if (data.error) throw new Error(data.error);
+        const map = {};
+        (Array.isArray(data) ? data : []).forEach(p => {
+          map[p.symbol] = { price: p.price, change: p.change, ccy: p.ccy, name: p.name, group: p.group };
+        });
+        setPrices(map);
+        setLoading(false);
+        setError(null);
+      } catch(e) {
+        if (alive) { setError(e.message); setLoading(false); }
+      }
+    }
+    load();
+    const timer = setInterval(load, refreshMs);
+    return () => { alive = false; clearInterval(timer); };
+  }, [refreshMs]);
+
+  return { prices, loading, error };
+}
+
+// ─────────────────────────────────────────────────────────────
+// useBybitIndices — fetches world market indices via stooq.com
+// Returns: { prices: { SPX: { price, change, name, region } }, loading, error }
+// ─────────────────────────────────────────────────────────────
+function useBybitIndices(refreshMs = 600000) {
+  const [prices, setPrices] = React.useState({});
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError]   = React.useState(null);
+
+  React.useEffect(() => {
+    let alive = true;
+    async function load() {
+      try {
+        const res  = await fetch(`${BYBIT_WORKER}/indices`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!alive) return;
+        if (data.error) throw new Error(data.error);
+        const map = {};
+        (Array.isArray(data) ? data : []).forEach(idx => {
+          if (!idx.error) {
+            map[idx.symbol] = { price: idx.price, change: idx.change, name: idx.name, region: idx.region };
+          }
+        });
+        setPrices(map);
+        setLoading(false);
+        setError(null);
+      } catch(e) {
+        if (alive) { setError(e.message); setLoading(false); }
+      }
+    }
+    load();
+    const timer = setInterval(load, refreshMs);
+    return () => { alive = false; clearInterval(timer); };
+  }, [refreshMs]);
+
+  return { prices, loading, error };
+}
+
+// ─────────────────────────────────────────────────────────────
 // BybitStatusBadge — small "live" indicator
 // ─────────────────────────────────────────────────────────────
 function BybitStatusBadge({ loading, error, dark = false }) {
@@ -265,6 +342,6 @@ function BybitAccountCard({ lang = 'ru', dark = false }) {
 
 Object.assign(window, {
   BYBIT_WORKER, BYBIT_SYMBOL_MAP, BYBIT_CRYPTO_SYMBOLS, BYBIT_FUTURES_SYMBOLS,
-  useBybitPrices, useBybitFutures, useBybitAccount,
+  useBybitPrices, useBybitFutures, useBybitAccount, useBybitForex, useBybitIndices,
   BybitStatusBadge, BybitAccountCard,
 });

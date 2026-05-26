@@ -33,26 +33,49 @@ const MARKETS_ALL = [
   { symbol: 'COPP',  name: 'Copper',      cls: 'comm',   ccy: '$', price:     4.62, change:  0.3, spark: [4.59,4.60,4.61,4.62,4.61,4.62,4.62] },
 ];
 
-// Mobile live assets — same source as web
+// Mobile live assets — crypto Binance, CFD/comm Bybit, forex/indices Bybit Worker
 const MOB_LIVE = {
   crypto: [
-    { symbol: 'BTC',    name: 'Bitcoin',   binance: 'BTCUSDT',    ccy: '$', cls: 'crypto', src: 'spot' },
-    { symbol: 'ETH',    name: 'Ethereum',  binance: 'ETHUSDT',    ccy: '$', cls: 'crypto', src: 'spot' },
-    { symbol: 'BNB',    name: 'BNB',       binance: 'BNBUSDT',    ccy: '$', cls: 'crypto', src: 'spot' },
-    { symbol: 'SOL',    name: 'Solana',    binance: 'SOLUSDT',    ccy: '$', cls: 'crypto', src: 'spot' },
-    { symbol: 'XRP',    name: 'XRP',       binance: 'XRPUSDT',    ccy: '$', cls: 'crypto', src: 'spot' },
-    { symbol: 'DOGE',   name: 'Dogecoin',  binance: 'DOGEUSDT',   ccy: '$', cls: 'crypto', src: 'spot' },
+    { symbol: 'BTC',  name: 'Bitcoin',   binance: 'BTCUSDT',  ccy: '$', cls: 'crypto' },
+    { symbol: 'ETH',  name: 'Ethereum',  binance: 'ETHUSDT',  ccy: '$', cls: 'crypto' },
+    { symbol: 'BNB',  name: 'BNB',       binance: 'BNBUSDT',  ccy: '$', cls: 'crypto' },
+    { symbol: 'SOL',  name: 'Solana',    binance: 'SOLUSDT',  ccy: '$', cls: 'crypto' },
+    { symbol: 'XRP',  name: 'XRP',       binance: 'XRPUSDT',  ccy: '$', cls: 'crypto' },
+    { symbol: 'ADA',  name: 'Cardano',   binance: 'ADAUSDT',  ccy: '$', cls: 'crypto' },
+    { symbol: 'DOGE', name: 'Dogecoin',  binance: 'DOGEUSDT', ccy: '$', cls: 'crypto' },
   ],
   cfd: [
-    { symbol: 'AAPL',  name: 'Apple Inc.',  binance: 'AAPLUSDT',  ccy: '$', cls: 'cfd', src: 'futures' },
-    { symbol: 'NVDA',  name: 'Nvidia',      binance: 'NVDAUSDT',  ccy: '$', cls: 'cfd', src: 'futures' },
-    { symbol: 'TSLA',  name: 'Tesla',       binance: 'TSLAUSDT',  ccy: '$', cls: 'cfd', src: 'futures' },
-    { symbol: 'GOOGL', name: 'Alphabet',    binance: 'GOOGLUSDT', ccy: '$', cls: 'cfd', src: 'futures' },
+    { symbol: 'AAPL',  name: 'Apple Inc.',  bybit: 'AAPLUSDT',  ccy: '$', cls: 'cfd' },
+    { symbol: 'NVDA',  name: 'Nvidia',      bybit: 'NVDAUSDT',  ccy: '$', cls: 'cfd' },
+    { symbol: 'TSLA',  name: 'Tesla',       bybit: 'TSLAUSDT',  ccy: '$', cls: 'cfd' },
+    { symbol: 'GOOGL', name: 'Alphabet',    bybit: 'GOOGLUSDT', ccy: '$', cls: 'cfd' },
+    { symbol: 'AMZN',  name: 'Amazon',      bybit: 'AMZNUSDT',  ccy: '$', cls: 'cfd' },
+    { symbol: 'META',  name: 'Meta',        bybit: 'METAUSDT',  ccy: '$', cls: 'cfd' },
+    { symbol: 'MSFT',  name: 'Microsoft',   bybit: 'MSFTUSDT',  ccy: '$', cls: 'cfd' },
   ],
   comm: [
-    { symbol: 'XAU',    name: 'Gold',   binance: 'XAUUSDT',    ccy: '$', cls: 'comm', src: 'futures' },
-    { symbol: 'XAG',    name: 'Silver', binance: 'XAGUSDT',    ccy: '$', cls: 'comm', src: 'futures' },
-    { symbol: 'COPPER', name: 'Copper', binance: 'COPPERUSDT', ccy: '$', cls: 'comm', src: 'futures' },
+    { symbol: 'XAU', name: 'Gold',   bybit: 'XAUUSDT', ccy: '$', cls: 'comm' },
+    { symbol: 'XAG', name: 'Silver', bybit: 'XAGUSDT', ccy: '$', cls: 'comm' },
+  ],
+  forex: [
+    { symbol: 'EURUSD', name: 'EUR / USD',  ccy: '$',  cls: 'fx' },
+    { symbol: 'GBPUSD', name: 'GBP / USD',  ccy: '$',  cls: 'fx' },
+    { symbol: 'USDJPY', name: 'USD / JPY',  ccy: '¥',  cls: 'fx' },
+    { symbol: 'USDCHF', name: 'USD / CHF',  ccy: 'Fr', cls: 'fx' },
+    { symbol: 'AUDUSD', name: 'AUD / USD',  ccy: '$',  cls: 'fx' },
+    { symbol: 'USDCAD', name: 'USD / CAD',  ccy: 'C$', cls: 'fx' },
+    { symbol: 'NZDUSD', name: 'NZD / USD',  ccy: '$',  cls: 'fx' },
+    { symbol: 'USDKGS', name: 'USD / KGS',  ccy: 'с',  cls: 'fx' },
+  ],
+  indices: [
+    { symbol: 'SPX', name: 'S&P 500',    cls: 'idx', region: 'us' },
+    { symbol: 'NDQ', name: 'NASDAQ 100', cls: 'idx', region: 'us' },
+    { symbol: 'DJI', name: 'Dow Jones',  cls: 'idx', region: 'us' },
+    { symbol: 'DAX', name: 'DAX 40',     cls: 'idx', region: 'eu' },
+    { symbol: 'CAC', name: 'CAC 40',     cls: 'idx', region: 'eu' },
+    { symbol: 'NKX', name: 'Nikkei 225', cls: 'idx', region: 'jp' },
+    { symbol: 'SHC', name: 'Shanghai',   cls: 'idx', region: 'cn' },
+    { symbol: 'HSI', name: 'Hang Seng',  cls: 'idx', region: 'hk' },
   ],
 };
 
@@ -88,27 +111,39 @@ function MobileLiveRow({ asset, price, change, dark, border, sub, text, onAsset 
 }
 
 function MarketsScreen({ lang = 'ru', onAsset, dark = false }) {
-  const [cls, setCls] = React.useState('forex');
+  const [cls, setCls] = React.useState('crypto');
 
-  const spotSymbols    = MOB_LIVE.crypto.map(a => a.binance);
-  const futuresSymbols = [...MOB_LIVE.cfd, ...MOB_LIVE.comm].map(a => a.binance);
+  // Binance: crypto spot
+  const spotSymbols = MOB_LIVE.crypto.map(a => a.binance);
+  const { prices: spotPrices, loading: spotLoading, error: spotError } =
+    typeof useBinancePrices === 'function' ? useBinancePrices(spotSymbols) : { prices: {}, loading: false, error: null };
 
-  const { prices: spotPrices,    loading: spotLoading,    error: spotError }    =
-    typeof useBinancePrices  === 'function' ? useBinancePrices(spotSymbols)     : { prices: {}, loading: false, error: null };
-  const { prices: futuresPrices, loading: futuresLoading, error: futuresError } =
-    typeof useBinanceFutures === 'function' ? useBinanceFutures(futuresSymbols) : { prices: {}, loading: false, error: null };
+  // Bybit: CFD + commodities futures
+  const bybitFutSymbols = [...MOB_LIVE.cfd, ...MOB_LIVE.comm].map(a => a.bybit);
+  const { prices: bybitFutPrices, loading: bybitFutLoading, error: bybitFutError } =
+    typeof useBybitFutures === 'function' ? useBybitFutures(bybitFutSymbols) : { prices: {}, loading: false, error: null };
 
-  const isLiveTab   = ['crypto', 'cfd', 'comm'].includes(cls);
-  const liveLoading = cls === 'crypto' ? spotLoading    : futuresLoading;
-  const liveError   = cls === 'crypto' ? spotError      : futuresError;
+  // Bybit Worker: forex rates
+  const { prices: forexPrices, loading: forexLoading, error: forexError } =
+    typeof useBybitForex === 'function' ? useBybitForex() : { prices: {}, loading: false, error: null };
+
+  // Bybit Worker: world indices
+  const { prices: idxPrices, loading: idxLoading, error: idxError } =
+    typeof useBybitIndices === 'function' ? useBybitIndices() : { prices: {}, loading: false, error: null };
+
+  const LIVE_TABS = ['crypto', 'cfd', 'comm', 'fx', 'idx'];
+  const isLiveTab   = LIVE_TABS.includes(cls);
+  const liveLoading = cls === 'crypto' ? spotLoading : cls === 'fx' ? forexLoading : cls === 'idx' ? idxLoading : bybitFutLoading;
+  const liveError   = cls === 'crypto' ? spotError   : cls === 'fx' ? forexError   : cls === 'idx' ? idxError   : bybitFutError;
 
   const tabs = [
-    { id: 'forex',  label: lang === 'ru' ? 'Валюта'  : 'Currency' },
-    { id: 'cfd',    label: 'CFD' },
-    { id: 'kg',     label: 'KG' },
     { id: 'crypto', label: lang === 'ru' ? 'Крипто'  : 'Crypto' },
-    { id: 'fx',     label: 'Fx' },
-    { id: 'comm',   label: lang === 'ru' ? 'Товары'  : 'Commodities' },
+    { id: 'cfd',    label: 'CFD' },
+    { id: 'comm',   label: lang === 'ru' ? 'Товары'  : 'Comm.' },
+    { id: 'fx',     label: lang === 'ru' ? 'Форекс'  : 'Forex' },
+    { id: 'idx',    label: lang === 'ru' ? 'Индексы' : 'Indices' },
+    { id: 'forex',  label: lang === 'ru' ? 'Валюта'  : 'Currency' },
+    { id: 'kg',     label: 'KG' },
   ];
   const filtered = MARKETS_ALL.filter(m => m.cls === cls);
   const bg = dark ? SC.ink1000 : SC.paper;
@@ -121,8 +156,11 @@ function MarketsScreen({ lang = 'ru', onAsset, dark = false }) {
     <div style={{ position: 'absolute', inset: 0, background: bg, display: 'flex', flexDirection: 'column', color: text, overflow: 'hidden' }}>
       <div style={{ padding: '64px 20px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h1 style={{ margin: 0, fontSize: 28, fontWeight: 600, letterSpacing: '-0.04em', fontFamily: SC.fontDisplay }}>{t(lang, 'markets')}</h1>
-        {isLiveTab && typeof BinanceStatusBadge === 'function' && (
-          <BinanceStatusBadge loading={liveLoading} error={liveError} dark={dark}/>
+        {isLiveTab && (
+          <span style={{ fontSize: 10, fontWeight: 600, fontFamily: SC.fontMono,
+            color: liveError ? '#EF4444' : liveLoading ? sub : SC.green }}>
+            {liveLoading ? '…' : liveError ? 'offline' : '● live'}
+          </span>
         )}
       </div>
       {/* Search */}
@@ -149,29 +187,49 @@ function MarketsScreen({ lang = 'ru', onAsset, dark = false }) {
       </div>
       {/* List */}
       <div style={{ flex: 1, padding: '4px 20px 96px', overflowY: 'auto' }}>
-        {/* Live tabs */}
+        {/* Crypto — Binance spot */}
         {cls === 'crypto' && MOB_LIVE.crypto.map((asset, i, arr) => {
           const live = spotPrices[asset.binance] || {};
           return <MobileLiveRow key={asset.symbol} asset={asset} price={live.price} change={live.change}
             dark={dark} sub={sub} text={text} onAsset={onAsset}
             border={i === arr.length - 1 ? 'none' : border}/>;
         })}
+        {/* CFD stocks — Bybit futures */}
         {cls === 'cfd' && MOB_LIVE.cfd.map((asset, i, arr) => {
-          const live = futuresPrices[asset.binance] || {};
+          const live = bybitFutPrices[asset.bybit] || {};
           return <MobileLiveRow key={asset.symbol} asset={asset} price={live.price} change={live.change}
             dark={dark} sub={sub} text={text} onAsset={onAsset}
             border={i === arr.length - 1 ? 'none' : border}/>;
         })}
+        {/* Commodities — Bybit futures */}
         {cls === 'comm' && MOB_LIVE.comm.map((asset, i, arr) => {
-          const live = futuresPrices[asset.binance] || {};
+          const live = bybitFutPrices[asset.bybit] || {};
           return <MobileLiveRow key={asset.symbol} asset={asset} price={live.price} change={live.change}
+            dark={dark} sub={sub} text={text} onAsset={onAsset}
+            border={i === arr.length - 1 ? 'none' : border}/>;
+        })}
+        {/* Forex — Bybit Worker */}
+        {cls === 'fx' && MOB_LIVE.forex.map((asset, i, arr) => {
+          const live = forexPrices[asset.symbol] || {};
+          return <MobileLiveRow key={asset.symbol} asset={{ ...asset, price: live.price || 0, change: live.change || 0, spark: [] }}
+            price={live.price} change={live.change}
+            dark={dark} sub={sub} text={text} onAsset={onAsset}
+            border={i === arr.length - 1 ? 'none' : border}/>;
+        })}
+        {/* World indices — Bybit Worker (stooq) */}
+        {cls === 'idx' && MOB_LIVE.indices.map((asset, i, arr) => {
+          const live = idxPrices[asset.symbol] || {};
+          const flag = { us: '🇺🇸', eu: '🇪🇺', jp: '🇯🇵', cn: '🇨🇳', hk: '🇭🇰' }[asset.region] || '';
+          return <MobileLiveRow key={asset.symbol}
+            asset={{ ...asset, name: `${flag} ${asset.name}`, ccy: '', price: live.price || 0, change: live.change || 0, spark: [] }}
+            price={live.price} change={live.change}
             dark={dark} sub={sub} text={text} onAsset={onAsset}
             border={i === arr.length - 1 ? 'none' : border}/>;
         })}
 
-        {/* Static tabs */}
-        {!isLiveTab && filtered.map((h, i) => (
-          <AssetRow key={h.symbol} {...h} sparkData={h.spark} priceCcy={h.ccy} dark={dark}
+        {/* Static tabs: forex (KGS), kg */}
+        {!LIVE_TABS.includes(cls) && filtered.map((h, i) => (
+          <AssetRow key={h.symbol + i} {...h} sparkData={h.spark} priceCcy={h.ccy} dark={dark}
             onClick={() => onAsset && onAsset(h)} last={i === filtered.length - 1}/>
         ))}
       </div>
