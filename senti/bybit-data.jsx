@@ -340,8 +340,43 @@ function BybitAccountCard({ lang = 'ru', dark = false }) {
   );
 }
 
+// ─────────────────────────────────────────────────────────────
+// useKgsRates — fetches KGS exchange rates once per day
+// Returns: { rates: { USD: 88.95, EUR: 95.20, RUB: 0.92, CNY: 12.87, KZT: 0.185 }, loading, error }
+// ─────────────────────────────────────────────────────────────
+function useKgsRates(refreshMs = 86400000) {
+  const [rates, setRates]   = React.useState({});
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError]   = React.useState(null);
+
+  React.useEffect(() => {
+    let alive = true;
+    async function load() {
+      try {
+        const res  = await fetch(`${BYBIT_WORKER}/kgs`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!alive) return;
+        if (data.error) throw new Error(data.error);
+        const map = {};
+        (Array.isArray(data) ? data : []).forEach(p => { map[p.symbol] = p.price; });
+        setRates(map);
+        setLoading(false);
+        setError(null);
+      } catch(e) {
+        if (alive) { setError(e.message); setLoading(false); }
+      }
+    }
+    load();
+    const timer = setInterval(load, refreshMs);
+    return () => { alive = false; clearInterval(timer); };
+  }, [refreshMs]);
+
+  return { rates, loading, error };
+}
+
 Object.assign(window, {
   BYBIT_WORKER, BYBIT_SYMBOL_MAP, BYBIT_CRYPTO_SYMBOLS, BYBIT_FUTURES_SYMBOLS,
   useBybitPrices, useBybitFutures, useBybitAccount, useBybitForex, useBybitIndices,
-  BybitStatusBadge, BybitAccountCard,
+  useKgsRates, BybitStatusBadge, BybitAccountCard,
 });

@@ -104,11 +104,15 @@ function WebMarketsView({ lang = 'ru', dark = false, onAsset }) {
   const { prices: binanceFutPrices, loading: binanceFutLoading, error: binanceFutError } =
     typeof useBinanceFutures === 'function' ? useBinanceFutures(binanceFutSymbols) : { prices: {}, loading: false, error: null };
 
-  const LIVE_TABS = ['crypto', 'cfd', 'comm'];
+  // KGS rates — once per day
+  const { rates: kgsRates, loading: kgsLoading, error: kgsError } =
+    typeof useKgsRates === 'function' ? useKgsRates() : { rates: {}, loading: false, error: null };
+
+  const LIVE_TABS = ['crypto', 'cfd', 'comm', 'forex'];
   const isLiveTab = LIVE_TABS.includes(cls);
-  const liveLoading = cls === 'crypto' ? spotLoading : binanceFutLoading;
-  const liveError   = cls === 'crypto' ? spotError   : binanceFutError;
-  const srcLabel    = cls === 'crypto' ? 'Bybit' : 'Binance';
+  const liveLoading = cls === 'crypto' ? spotLoading : cls === 'forex' ? kgsLoading : binanceFutLoading;
+  const liveError   = cls === 'crypto' ? spotError   : cls === 'forex' ? kgsError   : binanceFutError;
+  const srcLabel    = cls === 'crypto' ? 'Bybit' : cls === 'forex' ? 'live' : 'Binance';
 
   const tabs = [
     { id: 'crypto', label: lang === 'ru' ? 'Крипто' : 'Crypto' },
@@ -185,8 +189,40 @@ function WebMarketsView({ lang = 'ru', dark = false, onAsset }) {
             border={i === arr.length - 1 ? 'none' : border}/>;
         })}
 
-        {/* Static tabs: forex (KGS), kg */}
-        {!LIVE_TABS.includes(cls) && filtered.map((h, i, arr) => (
+        {/* Forex (Валюта) — KGS rates, daily refresh */}
+        {cls === 'forex' && MARKETS_ALL.filter(m => m.cls === 'forex').map((h, i, arr) => {
+          const livePrice = kgsRates[h.symbol];
+          const display = { ...h, price: livePrice != null ? livePrice : h.price };
+          return (
+          <div key={h.symbol + i} onClick={() => onAsset && onAsset(display)} style={{
+            display: 'grid', gridTemplateColumns: '2.2fr 1fr 1fr 1fr 1fr 0.8fr', gap: 12,
+            padding: '14px 4px', alignItems: 'center',
+            borderBottom: i === arr.length - 1 ? 'none' : border, cursor: 'pointer',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <TickerLogo symbol={h.symbol} size={36}/>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: '-0.2px' }}>{h.symbol}</div>
+                <div style={{ fontSize: 12, color: sub, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 180 }}>{h.name}</div>
+              </div>
+            </div>
+            <div style={{ fontFamily: SC.fontMono, fontSize: 14, fontWeight: 600, textAlign: 'right' }}>
+              {display.ccy}{display.price.toLocaleString('en-US', { minimumFractionDigits: display.price < 1 ? 4 : 2, maximumFractionDigits: display.price < 1 ? 4 : 3 })}
+            </div>
+            <div style={{ textAlign: 'right' }}><DeltaPill value={display.change}/></div>
+            <div style={{ fontFamily: SC.fontMono, fontSize: 13, color: sub, textAlign: 'right' }}>—</div>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <Sparkline data={h.spark} width={80} height={28}/>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Pill variant={dark ? 'softDark' : 'soft'} size="sm">{t(lang, 'buy')} →</Pill>
+            </div>
+          </div>
+          );
+        })}
+
+        {/* KG stocks — static (КФБ) */}
+        {cls === 'kg' && MARKETS_ALL.filter(m => m.cls === 'kg').map((h, i, arr) => (
           <div key={h.symbol + i} onClick={() => onAsset && onAsset(h)} style={{
             display: 'grid', gridTemplateColumns: '2.2fr 1fr 1fr 1fr 1fr 0.8fr', gap: 12,
             padding: '14px 4px', alignItems: 'center',
@@ -203,9 +239,7 @@ function WebMarketsView({ lang = 'ru', dark = false, onAsset }) {
               {h.ccy}{h.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             <div style={{ textAlign: 'right' }}><DeltaPill value={h.change}/></div>
-            <div style={{ fontFamily: SC.fontMono, fontSize: 13, color: sub, textAlign: 'right' }}>
-              {h.cls === 'kg' ? '42K' : '—'}
-            </div>
+            <div style={{ fontFamily: SC.fontMono, fontSize: 13, color: sub, textAlign: 'right' }}>42K</div>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <Sparkline data={h.spark} width={80} height={28}/>
             </div>

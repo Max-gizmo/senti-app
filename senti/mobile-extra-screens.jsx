@@ -14,14 +14,21 @@ const MARKETS_ALL = [
   { symbol: 'BTC',   name: 'Bitcoin',     cls: 'crypto', ccy: '$', price: 69420.10, change:  0.4, spark: [69100,69300,69200,69500,69300,69400,69420] },
   { symbol: 'ETH',   name: 'Ethereum',    cls: 'crypto', ccy: '$', price:  3520.55, change: -0.8, spark: [3580,3550,3570,3540,3530,3525,3520] },
   { symbol: 'USDT',  name: 'Tether',      cls: 'crypto', ccy: '$', price:     1.00, change:  0.0, spark: [1,1,1,1,1,1,1] },
-  // KG
-  { symbol: 'KCEL',  name: 'Кыргызтелеком',cls:'kg',     ccy: 'с', price:   248.00, change:  1.2, spark: [244,245,246,246,247,247.5,248] },
-  { symbol: 'BKAI',  name: 'Банк Кыргызстана', cls:'kg', ccy: 'с', price:  1420.00, change: -0.4, spark: [1430,1425,1424,1422,1420,1420,1420] },
-  { symbol: 'KICB',  name: 'KICB',        cls: 'kg',     ccy: 'с', price:    76.00, change:  2.1, spark: [73,74,74.5,75,75.5,76,76] },
-  // Cash / Currency (Валюта) — KGS exchange rates
-  { symbol: 'USD',   name: 'USD / KGS',   cls: 'forex',  ccy: 'с', price:    88.95, change: -0.1, spark: [89.1,89.05,89.0,88.98,88.96,88.95,88.95] },
-  { symbol: 'EUR',   name: 'EUR / KGS',   cls: 'forex',  ccy: 'с', price:    95.20, change:  0.3, spark: [94.7,94.9,95.0,95.1,95.0,95.15,95.2] },
-  { symbol: 'RUB',   name: 'RUB / KGS',   cls: 'forex',  ccy: 'с', price:     0.92, change:  0.2, spark: [0.91,0.91,0.92,0.92,0.92,0.92,0.92] },
+  // KG (Кыргызская фондовая биржа)
+  { symbol: 'KCEL',  name: 'Кыргызтелеком',   cls: 'kg', ccy: 'с', price:   248.00, change:  1.2, spark: [244,245,246,246,247,247.5,248] },
+  { symbol: 'BKAI',  name: 'Банк Кыргызстана', cls: 'kg', ccy: 'с', price:  1420.00, change: -0.4, spark: [1430,1425,1424,1422,1420,1420,1420] },
+  { symbol: 'KICB',  name: 'KICB',             cls: 'kg', ccy: 'с', price:    76.00, change:  2.1, spark: [73,74,74.5,75,75.5,76,76] },
+  { symbol: 'AKMB',  name: 'Айыл Банк',        cls: 'kg', ccy: 'с', price:   852.00, change:  0.3, spark: [848,849,850,851,851,852,852] },
+  { symbol: 'OPTB',  name: 'Оптима Банк',      cls: 'kg', ccy: 'с', price:   418.00, change: -0.8, spark: [422,421,420,419,418,418,418] },
+  { symbol: 'RSKS',  name: 'РСК Банк',         cls: 'kg', ccy: 'с', price:  1148.00, change:  0.5, spark: [1140,1142,1144,1145,1146,1147,1148] },
+  { symbol: 'ELST',  name: 'Электрические станции', cls: 'kg', ccy: 'с', price:  94.00, change: -0.2, spark: [95,94.5,94.5,94,94,94,94] },
+  { symbol: 'BKKY',  name: 'Бакай Банк',       cls: 'kg', ccy: 'с', price:   376.00, change:  1.5, spark: [370,371,372,374,374,375,376] },
+  // Cash / Currency (Валюта) — KGS exchange rates (live via useKgsRates, static as fallback)
+  { symbol: 'USD',   name: 'USD / KGS',   cls: 'forex',  ccy: 'с', price:    88.95, change: 0, spark: [89.1,89.05,89.0,88.98,88.96,88.95,88.95] },
+  { symbol: 'EUR',   name: 'EUR / KGS',   cls: 'forex',  ccy: 'с', price:    95.20, change: 0, spark: [94.7,94.9,95.0,95.1,95.0,95.15,95.2] },
+  { symbol: 'RUB',   name: 'RUB / KGS',   cls: 'forex',  ccy: 'с', price:     0.92, change: 0, spark: [0.91,0.91,0.92,0.92,0.92,0.92,0.92] },
+  { symbol: 'CNY',   name: 'CNY / KGS',   cls: 'forex',  ccy: 'с', price:    12.87, change: 0, spark: [12.8,12.82,12.84,12.85,12.86,12.87,12.87] },
+  { symbol: 'KZT',   name: 'KZT / KGS',   cls: 'forex',  ccy: 'с', price:     0.185, change: 0, spark: [0.184,0.184,0.185,0.185,0.185,0.185,0.185] },
   // Fx (global pairs)
   { symbol: 'EUR',   name: 'EUR / USD',   cls: 'fx',     ccy: '$', price:     1.0825, change:  0.4, spark: [1.078,1.079,1.081,1.080,1.082,1.083,1.0825] },
   { symbol: 'GBP',   name: 'GBP / USD',   cls: 'fx',     ccy: '$', price:     1.2640, change: -0.2, spark: [1.267,1.266,1.265,1.264,1.263,1.264,1.264] },
@@ -111,10 +118,14 @@ function MarketsScreen({ lang = 'ru', onAsset, dark = false }) {
   const { prices: binanceFutPrices, loading: binanceFutLoading, error: binanceFutError } =
     typeof useBinanceFutures === 'function' ? useBinanceFutures(binanceFutSymbols) : { prices: {}, loading: false, error: null };
 
-  const LIVE_TABS = ['crypto', 'cfd', 'comm'];
+  // KGS rates — once per day
+  const { rates: kgsRates, loading: kgsLoading, error: kgsError } =
+    typeof useKgsRates === 'function' ? useKgsRates() : { rates: {}, loading: false, error: null };
+
+  const LIVE_TABS = ['crypto', 'cfd', 'comm', 'forex'];
   const isLiveTab   = LIVE_TABS.includes(cls);
-  const liveLoading = cls === 'crypto' ? spotLoading : binanceFutLoading;
-  const liveError   = cls === 'crypto' ? spotError   : binanceFutError;
+  const liveLoading = cls === 'crypto' ? spotLoading : cls === 'forex' ? kgsLoading : binanceFutLoading;
+  const liveError   = cls === 'crypto' ? spotError   : cls === 'forex' ? kgsError   : binanceFutError;
 
   const tabs = [
     { id: 'crypto', label: lang === 'ru' ? 'Крипто' : 'Crypto' },
@@ -187,10 +198,18 @@ function MarketsScreen({ lang = 'ru', onAsset, dark = false }) {
             border={i === arr.length - 1 ? 'none' : border}/>;
         })}
 
-        {/* Static tabs: forex (KGS), kg */}
-        {!LIVE_TABS.includes(cls) && filtered.map((h, i) => (
+        {/* Forex (Валюта) — KGS rates, daily refresh */}
+        {cls === 'forex' && MARKETS_ALL.filter(m => m.cls === 'forex').map((h, i, arr) => {
+          const livePrice = kgsRates[h.symbol];
+          const display = { ...h, price: livePrice != null ? livePrice : h.price };
+          return <AssetRow key={h.symbol + i} {...display} sparkData={h.spark} priceCcy={h.ccy} dark={dark}
+            onClick={() => onAsset && onAsset(display)} last={i === arr.length - 1}/>;
+        })}
+
+        {/* KG stocks — static (КФБ) */}
+        {cls === 'kg' && MARKETS_ALL.filter(m => m.cls === 'kg').map((h, i, arr) => (
           <AssetRow key={h.symbol + i} {...h} sparkData={h.spark} priceCcy={h.ccy} dark={dark}
-            onClick={() => onAsset && onAsset(h)} last={i === filtered.length - 1}/>
+            onClick={() => onAsset && onAsset(h)} last={i === arr.length - 1}/>
         ))}
       </div>
     </div>
