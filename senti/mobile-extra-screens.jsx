@@ -328,26 +328,32 @@ function AssetDetailScreen({ asset, lang = 'ru', onBack, onTrade, dark = false }
 }
 
 // ─────────────────────────────────────────────────────────────
-// Trade modal (bottom sheet) — buy / sell with numpad + slider
+// Trade modal (bottom sheet) — buy / sell with numpad
+// Amount is in USD. Minimum $5.
 // ─────────────────────────────────────────────────────────────
+const TRADE_MIN_USD = 5;
+
 function TradeSheet({ side, asset, lang = 'ru', onClose, onSubmit, dark = false }) {
   const [amount, setAmount] = React.useState('');
-  const sub = dark ? 'rgba(255,255,255,0.5)' : SC.ink500;
-  const text = dark ? '#fff' : SC.ink1000;
-  const cardBg = dark ? SC.ink900 : SC.paper;
-  const keyBg = dark ? 'rgba(255,255,255,0.06)' : SC.ink50;
+  const sub     = dark ? 'rgba(255,255,255,0.5)' : SC.ink500;
+  const text    = dark ? '#fff' : SC.ink1000;
+  const cardBg  = dark ? SC.ink900 : SC.paper;
+  const keyBg   = dark ? 'rgba(255,255,255,0.06)' : SC.ink50;
+  const errColor = '#EF4444';
 
   const onKey = (k) => {
     if (k === 'back') setAmount(a => a.slice(0, -1));
     else if (k === '.') { if (!amount.includes('.')) setAmount(a => (a || '0') + '.'); }
-    else setAmount(a => (a + k).slice(0, 12));
+    else setAmount(a => (a + k).slice(0, 10));
   };
 
   const numpad = ['1','2','3','4','5','6','7','8','9','.','0','back'];
   const display = amount || '0';
   const numericAmount = parseFloat(amount || '0') || 0;
-  const qty = numericAmount / asset.price;
+  const qty = asset.price > 0 ? numericAmount / asset.price : 0;
   const isBuy = side === 'buy';
+  const tooLow = numericAmount > 0 && numericAmount < TRADE_MIN_USD;
+  const canSubmit = numericAmount >= TRADE_MIN_USD;
 
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 50 }}>
@@ -380,23 +386,32 @@ function TradeSheet({ side, asset, lang = 'ru', onClose, onSubmit, dark = false 
         {/* amount */}
         <div style={{ textAlign: 'center', padding: '4px 0 0' }}>
           <div style={{ fontSize: 12, color: sub, fontWeight: 500, marginBottom: 6 }}>
-            {lang === 'ru' ? 'Сумма в сомах' : 'Amount in KGS'}
+            {lang === 'ru' ? 'Сумма, USD' : 'Amount, USD'}
           </div>
-          <div style={{ fontFamily: SC.fontMono, fontSize: 56, fontWeight: 700, letterSpacing: '-0.04em', color: text }}>
+          <div style={{ fontFamily: SC.fontMono, fontSize: 56, fontWeight: 700, letterSpacing: '-0.04em', color: tooLow ? errColor : text }}>
+            <span style={{ opacity: 0.4, fontSize: 30, marginRight: 4 }}>$</span>
             <span>{display}</span>
-            <span style={{ opacity: 0.4, fontSize: 30, marginLeft: 6 }}>с</span>
           </div>
-          <div style={{ fontSize: 12, color: sub, marginTop: 6, fontFamily: SC.fontMono }}>
-            ≈ {qty.toFixed(qty < 1 ? 4 : 2)} {asset.symbol}
-          </div>
+          {tooLow ? (
+            <div style={{ fontSize: 12, color: errColor, marginTop: 6, fontWeight: 600 }}>
+              {lang === 'ru' ? `Минимум $${TRADE_MIN_USD}` : `Minimum $${TRADE_MIN_USD}`}
+            </div>
+          ) : (
+            <div style={{ fontSize: 12, color: sub, marginTop: 6, fontFamily: SC.fontMono }}>
+              {numericAmount > 0 ? `≈ ${qty < 0.0001 ? qty.toExponential(4) : qty.toFixed(qty < 1 ? 6 : 4)} ${asset.symbol}` : `${lang === 'ru' ? 'Курс' : 'Price'}: $${asset.price.toLocaleString('en-US', { maximumFractionDigits: 2 })}`}
+            </div>
+          )}
         </div>
         {/* quick chips */}
         <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-          {[1000, 5000, 10000, 25000].map(v => (
+          {[5, 10, 25, 100].map(v => (
             <button key={v} onClick={() => setAmount(String(v))} style={{
-              background: keyBg, color: text, border: 'none', cursor: 'pointer',
+              background: numericAmount === v ? (isBuy ? SC.green : SC.ink1000) : keyBg,
+              color: numericAmount === v ? '#fff' : text,
+              border: 'none', cursor: 'pointer',
               padding: '7px 14px', borderRadius: 999, fontFamily: SC.fontMono, fontSize: 12, fontWeight: 600,
-            }}>{v.toLocaleString('en-US').replace(/,/g, '\u202F')} с</button>
+              transition: 'background 0.15s',
+            }}>${v}</button>
           ))}
         </div>
         {/* numpad */}
@@ -412,9 +427,99 @@ function TradeSheet({ side, asset, lang = 'ru', onClose, onSubmit, dark = false 
           ))}
         </div>
         {/* CTA */}
-        <Pill variant={isBuy ? 'primary' : 'dark'} size="lg" arrow full onClick={() => onSubmit(side, asset, numericAmount)}>
-          {isBuy ? t(lang, 'buy') : t(lang, 'sell')}
-        </Pill>
+        <div style={{ opacity: canSubmit ? 1 : 0.4, transition: 'opacity 0.2s' }}>
+          <Pill variant={isBuy ? 'primary' : 'dark'} size="lg" arrow full
+            onClick={() => canSubmit && onSubmit(side, asset, numericAmount)}>
+            {isBuy ? t(lang, 'buy') : t(lang, 'sell')} {canSubmit ? `$${numericAmount}` : `(min $${TRADE_MIN_USD})`}
+          </Pill>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// QuickTradeSheet — asset picker for Быстрая сделка
+// Shows only Bybit crypto with live prices, then opens TradeSheet
+// ─────────────────────────────────────────────────────────────
+function QuickTradeSheet({ lang = 'ru', dark = false, onClose, onPick }) {
+  const bybitSymbols = MOB_LIVE.crypto.map(a => a.bybit);
+  const { prices, loading } = typeof useBybitPrices === 'function'
+    ? useBybitPrices(bybitSymbols)
+    : { prices: {}, loading: false };
+
+  const sub    = dark ? 'rgba(255,255,255,0.5)' : SC.ink500;
+  const text   = dark ? '#fff' : SC.ink1000;
+  const cardBg = dark ? SC.ink900 : SC.paper;
+  const rowBg  = dark ? 'rgba(255,255,255,0.04)' : SC.ink50;
+  const border = dark ? '1px solid rgba(255,255,255,0.06)' : `1px solid ${SC.ink100}`;
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, zIndex: 50 }}>
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}/>
+      <div style={{
+        position: 'absolute', left: 0, right: 0, bottom: 0,
+        background: cardBg, color: text,
+        borderTopLeftRadius: 36, borderTopRightRadius: 36,
+        padding: '12px 20px 34px',
+        boxShadow: '0 -8px 30px rgba(0,0,0,0.18)',
+        maxHeight: '85%', display: 'flex', flexDirection: 'column',
+      }}>
+        {/* grabber */}
+        <div style={{ alignSelf: 'center', width: 40, height: 4, borderRadius: 999, background: dark ? 'rgba(255,255,255,0.2)' : SC.ink200, marginBottom: 16 }}/>
+        {/* header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-0.3px' }}>
+              {lang === 'ru' ? 'Быстрая сделка' : 'Quick Trade'}
+            </div>
+            <div style={{ fontSize: 12, color: sub, marginTop: 2, display: 'flex', alignItems: 'center', gap: 5 }}>
+              <span style={{ width: 6, height: 6, borderRadius: 999, background: loading ? sub : SC.green, display: 'inline-block',
+                boxShadow: loading ? 'none' : `0 0 5px ${SC.green}`,
+                animation: loading ? 'none' : 'binance-pulse 2s ease-in-out infinite' }}/>
+              {loading ? (lang === 'ru' ? 'Загрузка…' : 'Loading…') : 'Bybit live'}
+            </div>
+          </div>
+          <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: 999, background: dark ? 'rgba(255,255,255,0.06)' : SC.ink100, border: 'none', display: 'grid', placeItems: 'center', cursor: 'pointer' }}>
+            <Icon name="chevD" size={18} color={text}/>
+          </button>
+        </div>
+        {/* crypto list */}
+        <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {MOB_LIVE.crypto.map(asset => {
+            const live = prices[asset.bybit] || {};
+            const price = live.price;
+            const change = live.change;
+            return (
+              <button key={asset.symbol}
+                onClick={() => onPick({ ...asset, price: price || asset.price || 0, change: change || 0,
+                  spark: change >= 0 ? [100,101,102,101,103,102,104,105] : [105,104,103,102,101,100,101,99] })}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '13px 14px', borderRadius: 20,
+                  background: rowBg, border, cursor: 'pointer', textAlign: 'left', color: text,
+                }}>
+                <TickerLogo symbol={asset.symbol} size={40}/>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: '-0.2px' }}>{asset.symbol}</div>
+                  <div style={{ fontSize: 12, color: sub }}>{asset.name}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontFamily: SC.fontMono, fontSize: 14, fontWeight: 600 }}>
+                    {price != null
+                      ? `$${price > 1000 ? price.toLocaleString('en-US', { maximumFractionDigits: 0 }) : price.toLocaleString('en-US', { maximumFractionDigits: 4 })}`
+                      : <span style={{ color: sub }}>…</span>}
+                  </div>
+                  {change != null && <DeltaPill value={change} size="sm"/>}
+                </div>
+                <Icon name="chevR" size={14} color={sub}/>
+              </button>
+            );
+          })}
+        </div>
+        <div style={{ marginTop: 12, fontSize: 11, color: sub, textAlign: 'center', letterSpacing: '-0.1px' }}>
+          {lang === 'ru' ? `Минимальная сумма сделки — $${TRADE_MIN_USD}` : `Minimum trade amount — $${TRADE_MIN_USD}`}
+        </div>
       </div>
     </div>
   );
@@ -951,7 +1056,7 @@ function HomeIdeasNews({ lang = 'ru', dark = false, accent = 'green' }) {
 }
 
 Object.assign(window, {
-  MARKETS_ALL, MarketsScreen, AssetDetailScreen, TradeSheet, TradeToast,
+  MARKETS_ALL, MarketsScreen, AssetDetailScreen, TradeSheet, QuickTradeSheet, TradeToast,
   ProfileScreen, MenuScreen, MobileAssetsView, HomeIdeasNews,
   MOBILE_NEWS_RU, MOBILE_NEWS_EN, MOBILE_IDEAS_RU, MOBILE_IDEAS_EN,
 });

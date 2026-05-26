@@ -257,11 +257,20 @@ function WebMarketsView({ lang = 'ru', dark = false, onAsset }) {
 // Asset detail page (web)
 // ─────────────────────────────────────────────────────────────
 function WebAssetDetail({ asset, lang = 'ru', dark = false, onBack, onTrade }) {
+  const [tradeSide, setTradeSide] = React.useState('buy');
+  const [tradeAmt,  setTradeAmt]  = React.useState('');
+
   const text = dark ? '#fff' : SC.ink1000;
   const sub = dark ? 'rgba(255,255,255,0.5)' : SC.ink500;
   const cardBg = dark ? SC.ink900 : SC.paper;
   const border = dark ? '1px solid rgba(255,255,255,0.06)' : `1px solid ${SC.ink200}`;
   const up = asset.change >= 0;
+
+  const numericAmt = parseFloat(tradeAmt || '0') || 0;
+  const tooLow = numericAmt > 0 && numericAmt < 5;
+  const canSubmit = numericAmt >= 5;
+  const qty = asset.price > 0 ? numericAmt / asset.price : 0;
+  const isBuy = tradeSide === 'buy';
   // Build longer series
   const long = [];
   for (let i = 0; i < 60; i++) {
@@ -328,34 +337,73 @@ function WebAssetDetail({ asset, lang = 'ru', dark = false, onBack, onTrade }) {
         {/* trade panel */}
         <aside>
           <div style={{ background: cardBg, borderRadius: 24, border, padding: 20, position: 'sticky', top: 0 }}>
+            {/* Buy / Sell toggle */}
             <div style={{ display: 'flex', background: dark ? 'rgba(255,255,255,0.06)' : SC.ink100, borderRadius: 12, padding: 3, marginBottom: 18 }}>
-              <button style={{ flex: 1, background: SC.green, color: '#fff', border: 'none', cursor: 'pointer', padding: '10px 0', borderRadius: 10, fontFamily: SC.fontDisplay, fontWeight: 600, fontSize: 13, letterSpacing: '-0.2px' }}>{t(lang, 'buy')}</button>
-              <button style={{ flex: 1, background: 'transparent', color: sub, border: 'none', cursor: 'pointer', padding: '10px 0', fontFamily: SC.fontDisplay, fontWeight: 600, fontSize: 13, letterSpacing: '-0.2px' }}>{t(lang, 'sell')}</button>
+              <button onClick={() => setTradeSide('buy')} style={{
+                flex: 1, background: isBuy ? SC.green : 'transparent', color: isBuy ? '#fff' : sub,
+                border: 'none', cursor: 'pointer', padding: '10px 0', borderRadius: 10,
+                fontFamily: SC.fontDisplay, fontWeight: 600, fontSize: 13, letterSpacing: '-0.2px',
+                transition: 'background 0.15s, color 0.15s',
+              }}>{t(lang, 'buy')}</button>
+              <button onClick={() => setTradeSide('sell')} style={{
+                flex: 1, background: !isBuy ? SC.ink1000 : 'transparent', color: !isBuy ? '#fff' : sub,
+                border: 'none', cursor: 'pointer', padding: '10px 0', borderRadius: 10,
+                fontFamily: SC.fontDisplay, fontWeight: 600, fontSize: 13, letterSpacing: '-0.2px',
+                transition: 'background 0.15s, color 0.15s',
+              }}>{t(lang, 'sell')}</button>
             </div>
+            {/* Amount input */}
             <div style={{ fontSize: 11, color: sub, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 8 }}>
-              {lang === 'ru' ? 'Сумма в сомах' : 'Amount in KGS'}
+              {lang === 'ru' ? 'Сумма, USD' : 'Amount, USD'}
             </div>
-            <div style={{ background: dark ? 'rgba(255,255,255,0.05)' : SC.ink50, borderRadius: 14, padding: '14px 16px', display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 14 }}>
-              <span style={{ fontFamily: SC.fontMono, fontSize: 24, fontWeight: 700, color: text, letterSpacing: '-0.03em' }}>5 000</span>
-              <span style={{ fontFamily: SC.fontMono, fontSize: 14, color: sub }}>с</span>
-              <div style={{ flex: 1 }}/>
-              <span style={{ fontSize: 11, color: sub, fontFamily: SC.fontMono }}>≈ {(5000 / asset.price).toFixed(4)} {asset.symbol}</span>
+            <div style={{
+              background: dark ? 'rgba(255,255,255,0.05)' : SC.ink50, borderRadius: 14,
+              padding: '14px 16px', display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8,
+              border: tooLow ? '1.5px solid #EF4444' : '1.5px solid transparent',
+            }}>
+              <span style={{ fontFamily: SC.fontMono, fontSize: 22, color: sub }}>$</span>
+              <input
+                type="number" min="0" step="0.01"
+                value={tradeAmt}
+                onChange={e => setTradeAmt(e.target.value)}
+                placeholder="0"
+                style={{
+                  flex: 1, background: 'transparent', border: 'none', outline: 'none',
+                  fontFamily: SC.fontMono, fontSize: 24, fontWeight: 700,
+                  color: tooLow ? '#EF4444' : text, letterSpacing: '-0.03em',
+                  width: '100%',
+                }}
+              />
+              {numericAmt > 0 && (
+                <span style={{ fontSize: 11, color: sub, fontFamily: SC.fontMono, whiteSpace: 'nowrap' }}>
+                  ≈ {qty < 0.0001 ? qty.toExponential(3) : qty.toFixed(qty < 1 ? 6 : 4)} {asset.symbol}
+                </span>
+              )}
             </div>
+            {tooLow && (
+              <div style={{ fontSize: 11, color: '#EF4444', fontWeight: 600, marginBottom: 8 }}>
+                {lang === 'ru' ? 'Минимальная сумма — $5' : 'Minimum amount — $5'}
+              </div>
+            )}
+            {/* Quick chips */}
             <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
-              {[1000, 5000, 10000, 25000].map(v => (
-                <span key={v} style={{
+              {[5, 10, 25, 100].map(v => (
+                <button key={v} onClick={() => setTradeAmt(String(v))} style={{
                   flex: 1, textAlign: 'center', padding: '7px 0', borderRadius: 8,
-                  background: dark ? 'rgba(255,255,255,0.05)' : SC.ink100,
-                  fontFamily: SC.fontMono, fontSize: 11, fontWeight: 600, color: text, cursor: 'pointer',
-                }}>{(v / 1000)}k</span>
+                  background: numericAmt === v ? (isBuy ? SC.green : SC.ink1000) : (dark ? 'rgba(255,255,255,0.05)' : SC.ink100),
+                  color: numericAmt === v ? '#fff' : text,
+                  fontFamily: SC.fontMono, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                  border: 'none', transition: 'background 0.15s',
+                }}>${v}</button>
               ))}
             </div>
-            {/* summary */}
+            {/* Summary */}
             <div style={{ background: dark ? 'rgba(255,255,255,0.03)' : SC.ink50, borderRadius: 14, padding: 14, marginBottom: 14 }}>
               {[
-                [lang === 'ru' ? 'Комиссия Senti' : 'Senti fee', '12,50 с'],
-                [lang === 'ru' ? 'Курс ' + asset.symbol : asset.symbol + ' price', `${asset.ccy}${asset.price.toFixed(2)}`],
-                [lang === 'ru' ? 'Получите' : 'You get', `${(5000 / asset.price).toFixed(4)} ${asset.symbol}`],
+                [lang === 'ru' ? 'Комиссия Senti' : 'Senti fee', numericAmt > 0 ? `$${(numericAmt * 0.0025).toFixed(4)}` : '—'],
+                [lang === 'ru' ? 'Курс ' + asset.symbol : asset.symbol + ' price', `$${asset.price.toLocaleString('en-US', { maximumFractionDigits: 2 })}`],
+                [isBuy ? (lang === 'ru' ? 'Получите' : 'You get') : (lang === 'ru' ? 'Продаёте' : 'You sell'),
+                  canSubmit ? `${qty < 0.0001 ? qty.toExponential(3) : qty.toFixed(6)} ${asset.symbol}` : '—'],
               ].map(([k, v], i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 12 }}>
                   <span style={{ color: sub }}>{k}</span>
@@ -363,7 +411,12 @@ function WebAssetDetail({ asset, lang = 'ru', dark = false, onBack, onTrade }) {
                 </div>
               ))}
             </div>
-            <Pill variant="primary" size="lg" arrow full onClick={() => onTrade && onTrade('buy', asset)}>{t(lang, 'buy')} {asset.symbol}</Pill>
+            <div style={{ opacity: canSubmit ? 1 : 0.45, transition: 'opacity 0.2s' }}>
+              <Pill variant={isBuy ? 'primary' : 'dark'} size="lg" arrow full
+                onClick={() => canSubmit && onTrade && onTrade(tradeSide, asset)}>
+                {isBuy ? t(lang, 'buy') : t(lang, 'sell')} {canSubmit ? `$${numericAmt}` : `(min $5)`}
+              </Pill>
+            </div>
           </div>
         </aside>
       </div>

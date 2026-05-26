@@ -101,10 +101,11 @@
       const lang = tweaks.lang;
       const variant = tweaks.variant;
 
-      const [screen, setScreen] = React.useState('home');
-      const [asset, setAsset]   = React.useState(null);
-      const [trade, setTrade]   = React.useState(null); // { side, asset } or null
-      const [toast, setToast]   = React.useState(null);
+      const [screen, setScreen]       = React.useState('home');
+      const [asset, setAsset]         = React.useState(null);
+      const [trade, setTrade]         = React.useState(null); // { side, asset } or null
+      const [quickTrade, setQuickTrade] = React.useState(false);
+      const [toast, setToast]         = React.useState(null);
 
       // Update stage bg by theme
       React.useEffect(() => {
@@ -117,8 +118,7 @@
           b.classList.toggle('on', b.dataset.screen === screen);
           b.onclick = () => {
             if (b.dataset.screen === 'trade') {
-              // open trade sheet on a default asset (NVDA)
-              setTrade({ side: 'buy', asset: MARKETS_ALL.find(m => m.symbol === 'NVDA') });
+              setQuickTrade(true);
             } else {
               setScreen(b.dataset.screen);
               setAsset(null);
@@ -144,7 +144,7 @@
 
       const onTabChange = (id) => {
         if (id === 'trade') {
-          setTrade({ side: 'buy', asset: MARKETS_ALL.find(m => m.symbol === 'NVDA') });
+          setQuickTrade(true);
         } else {
           setScreen(id);
           setAsset(null);
@@ -155,9 +155,11 @@
       const onTrade = (side, a) => { setTrade({ side, asset: a }); };
       const onTradeSubmit = (side, a, amt) => {
         setTrade(null);
+        const sym = a.symbol;
+        const usd = amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         setToast(lang === 'ru'
-          ? `${side === 'buy' ? 'Куплено' : 'Продано'} ${a.symbol} на ${amt.toLocaleString('ru-RU')} с`
-          : `${side === 'buy' ? 'Bought' : 'Sold'} ${a.symbol} for ${amt.toLocaleString('en-US')} KGS`);
+          ? `${side === 'buy' ? 'Куплено' : 'Продано'} ${sym} на $${usd}`
+          : `${side === 'buy' ? 'Bought' : 'Sold'} ${sym} for $${usd}`);
         setTimeout(() => setToast(null), 2400);
       };
 
@@ -192,6 +194,9 @@
             <div data-screen-label={`Senti · ${asset ? asset.symbol : screen}`} style={{ position: 'relative', width: '100%', height: '100%' }}>
               {screenView}
               {showTabs && <BrokerTabs active={activeTab} onChange={onTabChange} lang={lang} dark={forceDark}/>}
+              {quickTrade && <QuickTradeSheet lang={lang} dark={forceDark}
+                               onClose={() => setQuickTrade(false)}
+                               onPick={a => { setQuickTrade(false); setTrade({ side: 'buy', asset: a }); }}/>}
               {trade && <TradeSheet side={trade.side} asset={trade.asset} lang={lang} dark={forceDark}
                           onClose={() => setTrade(null)} onSubmit={onTradeSubmit}/>}
               {toast && <TradeToast message={toast} dark={forceDark}/>}

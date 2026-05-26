@@ -237,7 +237,15 @@
       let inner;
       if (asset) {
         inner = renderShell(<WebAssetDetail asset={asset} lang={lang} dark={forceDark} onBack={() => setAsset(null)}
-                              onTrade={(side, a) => { setToast(lang === 'ru' ? `Куплено ${a.symbol} на 5 000 с` : `Bought ${a.symbol} for 5,000 KGS`); setTimeout(() => setToast(null), 2400); }}/>);
+                              onTrade={(side, a) => {
+                                const amtEl = document.querySelector('input[type=number]');
+                                const amt = amtEl ? parseFloat(amtEl.value) || 0 : 0;
+                                const usd = amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                setToast(lang === 'ru'
+                                  ? `${side === 'buy' ? 'Куплено' : 'Продано'} ${a.symbol} на $${usd}`
+                                  : `${side === 'buy' ? 'Bought' : 'Sold'} ${a.symbol} for $${usd}`);
+                                setTimeout(() => setToast(null), 2400);
+                              }}/>);
       } else if (screen === 'markets') {
         inner = renderShell(<WebMarketsView lang={lang} dark={forceDark} onAsset={setAsset}/>);
       } else if (screen === 'withdraw') {
