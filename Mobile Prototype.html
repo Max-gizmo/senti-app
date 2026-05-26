@@ -104,7 +104,7 @@
       const [screen, setScreen]       = React.useState('home');
       const [asset, setAsset]         = React.useState(null);
       const [trade, setTrade]         = React.useState(null); // { side, asset } or null
-      const [quickTrade, setQuickTrade] = React.useState(false);
+      const [quickTrade, setQuickTrade] = React.useState(null); // null | 'buy' | 'sell'
       const [toast, setToast]         = React.useState(null);
 
       // Update stage bg by theme
@@ -118,7 +118,7 @@
           b.classList.toggle('on', b.dataset.screen === screen);
           b.onclick = () => {
             if (b.dataset.screen === 'trade') {
-              setQuickTrade(true);
+              setQuickTrade('buy');
             } else {
               setScreen(b.dataset.screen);
               setAsset(null);
@@ -144,7 +144,7 @@
 
       const onTabChange = (id) => {
         if (id === 'trade') {
-          setQuickTrade(true);
+          setQuickTrade('buy');
         } else {
           setScreen(id);
           setAsset(null);
@@ -168,7 +168,7 @@
       const forceDark = variant === 'v3' || dark;
 
       const screens = {
-        home:     <HomeComponent lang={lang} onProfile={() => { setScreen('profile'); setAsset(null); }}/>,
+        home:     <HomeComponent lang={lang} onProfile={() => { setScreen('profile'); setAsset(null); }} onTrade={side => setQuickTrade(side)}/>,
         markets:  <MarketsScreen lang={lang} dark={forceDark} onAsset={onAssetTap}/>,
         assets:   <MobileAssetsView lang={lang} dark={forceDark} onAsset={onAssetTap}/>,
         menu:     <MenuScreen lang={lang} dark={forceDark} onProfile={() => { setScreen('profile'); setAsset(null); }}/>,
@@ -194,9 +194,9 @@
             <div data-screen-label={`Senti · ${asset ? asset.symbol : screen}`} style={{ position: 'relative', width: '100%', height: '100%' }}>
               {screenView}
               {showTabs && <BrokerTabs active={activeTab} onChange={onTabChange} lang={lang} dark={forceDark}/>}
-              {quickTrade && <QuickTradeSheet lang={lang} dark={forceDark}
-                               onClose={() => setQuickTrade(false)}
-                               onPick={a => { setQuickTrade(false); setTrade({ side: 'buy', asset: a }); }}/>}
+              {quickTrade && <QuickTradeSheet lang={lang} dark={forceDark} defaultSide={quickTrade}
+                               onClose={() => setQuickTrade(null)}
+                               onPick={a => { setQuickTrade(null); setTrade({ side: quickTrade, asset: a }); }}/>}
               {trade && <TradeSheet side={trade.side} asset={trade.asset} lang={lang} dark={forceDark}
                           onClose={() => setTrade(null)} onSubmit={onTradeSubmit}/>}
               {toast && <TradeToast message={toast} dark={forceDark}/>}

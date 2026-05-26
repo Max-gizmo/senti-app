@@ -224,7 +224,7 @@ function Donut({ segments, size = 160, thickness = 22, gap = 2, dark = false }) 
 // ──────────────────────────────────────────────────────────────
 // V1 — Web "Зелёный" : green hero card, allocation donut, holdings table
 // ──────────────────────────────────────────────────────────────
-function WebV1Green({ lang = 'ru', setLang = () => {}, onNav, active = 'home' }) {
+function WebV1Green({ lang = 'ru', setLang = () => {}, onNav, active = 'home', onTrade = () => {} }) {
   return (
     <div data-screen-label={`Web / V1 Green / ${lang}`} style={{
       display: 'flex', flex: 1, minWidth: 0, minHeight: 0,
@@ -258,8 +258,8 @@ function WebV1Green({ lang = 'ru', setLang = () => {}, onNav, active = 'home' })
                 </span>
               </div>
               <div style={{ display: 'flex', gap: 10 }}>
-                <Pill variant="dark" size="md" arrow icon="plus">{t(lang, 'buy')}</Pill>
-                <Pill variant="outline" size="md">{t(lang, 'sell')}</Pill>
+                <Pill variant="dark" size="md" arrow icon="plus" onClick={() => onTrade('buy')}>{t(lang, 'buy')}</Pill>
+                <Pill variant="outline" size="md" onClick={() => onTrade('sell')}>{t(lang, 'sell')}</Pill>
                 <Pill variant="outline" size="md" icon="upload">{t(lang, 'withdraw')}</Pill>
               </div>
             </div>
@@ -396,7 +396,7 @@ function WebV1Green({ lang = 'ru', setLang = () => {}, onNav, active = 'home' })
 // ──────────────────────────────────────────────────────────────
 // V2 — Web "Минимализм" : ink only on paper, sparse, generous whitespace
 // ──────────────────────────────────────────────────────────────
-function WebV2Minimal({ lang = 'ru', setLang = () => {}, onNav, active = 'home' }) {
+function WebV2Minimal({ lang = 'ru', setLang = () => {}, onNav, active = 'home', onTrade = () => {} }) {
   return (
     <div data-screen-label={`Web / V2 Minimal / ${lang}`} style={{
       display: 'flex', flex: 1, minWidth: 0, minHeight: 0,
@@ -420,7 +420,7 @@ function WebV2Minimal({ lang = 'ru', setLang = () => {}, onNav, active = 'home' 
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <Pill variant="outline" size="md" icon="download">{t(lang, 'topUp')}</Pill>
-              <Pill variant="dark" size="md" arrow icon="plus">{t(lang, 'buy')}</Pill>
+              <Pill variant="dark" size="md" arrow icon="plus" onClick={() => onTrade('buy')}>{t(lang, 'buy')}</Pill>
             </div>
           </div>
 
@@ -502,7 +502,7 @@ function WebV2Minimal({ lang = 'ru', setLang = () => {}, onNav, active = 'home' 
 // ──────────────────────────────────────────────────────────────
 // V3 — Web "Тёмная" : ink-1000 surfaces, green accent, denser
 // ──────────────────────────────────────────────────────────────
-function WebV3Dark({ lang = 'ru', setLang = () => {}, onNav, active = 'home' }) {
+function WebV3Dark({ lang = 'ru', setLang = () => {}, onNav, active = 'home', onTrade = () => {} }) {
   return (
     <div data-screen-label={`Web / V3 Dark / ${lang}`} style={{
       display: 'flex', flex: 1, minWidth: 0, minHeight: 0,
@@ -546,8 +546,8 @@ function WebV3Dark({ lang = 'ru', setLang = () => {}, onNav, active = 'home' }) 
                 </span>
               </div>
               <div style={{ display: 'flex', gap: 10 }}>
-                <Pill variant="primary" size="md" arrow icon="plus">{t(lang, 'buy')}</Pill>
-                <Pill variant="softDark" size="md">{t(lang, 'sell')}</Pill>
+                <Pill variant="primary" size="md" arrow icon="plus" onClick={() => onTrade('buy')}>{t(lang, 'buy')}</Pill>
+                <Pill variant="softDark" size="md" onClick={() => onTrade('sell')}>{t(lang, 'sell')}</Pill>
                 <Pill variant="softDark" size="md" icon="upload">{t(lang, 'withdraw')}</Pill>
               </div>
             </div>

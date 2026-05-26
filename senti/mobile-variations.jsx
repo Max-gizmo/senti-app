@@ -102,7 +102,7 @@ function BrokerTabs({ active, onChange, lang = 'ru', dark = false }) {
 // ──────────────────────────────────────────────────────────────
 // V1 — "Зелёный" : green hero card on light, more brand presence
 // ──────────────────────────────────────────────────────────────
-function MobileV1Green({ lang = 'ru', onProfile = () => {} }) {
+function MobileV1Green({ lang = 'ru', onProfile = () => {}, onTrade = () => {} }) {
   return (
     <div data-screen-label={`Mobile / V1 Green / ${lang}`} style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', background: SC.paper, overflow: 'hidden' }}>
       {/* Header */}
@@ -158,7 +158,7 @@ function MobileV1Green({ lang = 'ru', onProfile = () => {} }) {
           { id: 'with',   label: t(lang, 'withdraw'),icon: 'upload' },
           { id: 'topup',  label: t(lang, 'topUp'),   icon: 'download' },
         ].map(a => (
-          <button key={a.id} style={{
+          <button key={a.id} onClick={() => (a.id === 'buy' || a.id === 'sell') && onTrade(a.id)} style={{
             flex: 1, border: 'none', cursor: 'pointer',
             background: a.accent ? SC.ink1000 : SC.ink100,
             color: a.accent ? '#fff' : SC.ink1000,
@@ -200,7 +200,7 @@ function MobileV1Green({ lang = 'ru', onProfile = () => {} }) {
 // ──────────────────────────────────────────────────────────────
 // V2 — "Минимализм" : white-first, no green hero block, ink only
 // ──────────────────────────────────────────────────────────────
-function MobileV2Minimal({ lang = 'ru', onProfile = () => {} }) {
+function MobileV2Minimal({ lang = 'ru', onProfile = () => {}, onTrade = () => {} }) {
   const [tab, setTab] = React.useState('all');
   const tabs = [
     { id: 'all',    label: lang === 'ru' ? 'Все'    : 'All' },
@@ -269,7 +269,7 @@ function MobileV2Minimal({ lang = 'ru', onProfile = () => {} }) {
 // ──────────────────────────────────────────────────────────────
 // V3 — "Тёмная" : ink-1000 dark, green accents, more data dense
 // ──────────────────────────────────────────────────────────────
-function MobileV3Dark({ lang = 'ru', onProfile = () => {} }) {
+function MobileV3Dark({ lang = 'ru', onProfile = () => {}, onTrade = () => {} }) {
   return (
     <div data-screen-label={`Mobile / V3 Dark / ${lang}`} style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', background: SC.ink1000, overflow: 'hidden', color: '#fff' }}>
       {/* Header */}
@@ -330,7 +330,7 @@ function MobileV3Dark({ lang = 'ru', onProfile = () => {} }) {
           { id: 'with',   label: t(lang, 'withdraw'),icon: 'upload' },
           { id: 'topup',  label: t(lang, 'topUp'),   icon: 'download' },
         ].map(a => (
-          <button key={a.id} style={{
+          <button key={a.id} onClick={() => (a.id === 'buy' || a.id === 'sell') && onTrade(a.id)} style={{
             flex: 1, border: 'none', cursor: 'pointer',
             background: a.accent ? SC.green : 'rgba(255,255,255,0.06)',
             color: '#fff',

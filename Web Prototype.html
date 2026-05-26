@@ -204,9 +204,11 @@
       const dark = tweaks.theme === 'dark';
       const lang = tweaks.lang;
       const variant = tweaks.variant;
-      const [screen, setScreen] = React.useState('home');
-      const [asset, setAsset]  = React.useState(null);
-      const [toast, setToast]  = React.useState(null);
+      const [screen, setScreen]         = React.useState('home');
+      const [asset, setAsset]           = React.useState(null);
+      const [webQuickTrade, setWebQuickTrade] = React.useState(null); // null | 'buy' | 'sell'
+      const [webTrade, setWebTrade]     = React.useState(null); // { side, asset }
+      const [toast, setToast]           = React.useState(null);
 
       React.useEffect(() => {
         document.body.classList.toggle('dark-stage', dark);
@@ -253,8 +255,8 @@
       } else if (screen === 'history') {
         inner = renderShell(<WebHistory lang={lang} dark={forceDark}/>);
       } else if (screen === 'portfolio') {
-        // Full V1/V2/V3 dashboard (sidebar nav wired via onNav)
-        inner = <PortfolioComponent lang={lang} setLang={l => setTweak('lang', l)} onNav={onNav} active={screen}/>;
+        inner = <PortfolioComponent lang={lang} setLang={l => setTweak('lang', l)} onNav={onNav} active={screen}
+                  onTrade={side => setWebQuickTrade(side)}/>;
       } else if (screen === 'learn' || screen === 'settings') {
         inner = renderShell(
           <div style={{ padding: '60px 32px', color: forceDark ? '#fff' : SC.ink1000, fontFamily: SC.fontDisplay }}>
@@ -273,9 +275,39 @@
         inner = renderShell(<WebInvestmentIdeas lang={lang} dark={forceDark}/>);
       }
 
+      const onWebTradeSubmit = (side, a, amt) => {
+        setWebTrade(null);
+        const usd = amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        setToast(lang === 'ru'
+          ? `${side === 'buy' ? 'Куплено' : 'Продано'} ${a.symbol} на $${usd}`
+          : `${side === 'buy' ? 'Bought' : 'Sold'} ${a.symbol} for $${usd}`);
+        setTimeout(() => setToast(null), 2400);
+      };
+
       return (
         <React.Fragment>
           {inner}
+          {webQuickTrade && (
+            <div style={{ position: 'fixed', inset: 0, zIndex: 80, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div onClick={() => setWebQuickTrade(null)} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)' }}/>
+              <div style={{ position: 'relative', width: 420, maxHeight: '80vh', overflowY: 'auto', borderRadius: 28,
+                background: forceDark ? SC.ink900 : SC.paper, boxShadow: '0 24px 60px -8px rgba(0,0,0,0.35)', display: 'flex', flexDirection: 'column' }}>
+                <QuickTradeSheet lang={lang} dark={forceDark} defaultSide={webQuickTrade} inline
+                  onClose={() => setWebQuickTrade(null)}
+                  onPick={a => { setWebQuickTrade(null); setWebTrade({ side: webQuickTrade, asset: a }); }}/>
+              </div>
+            </div>
+          )}
+          {webTrade && (
+            <div style={{ position: 'fixed', inset: 0, zIndex: 80, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div onClick={() => setWebTrade(null)} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)' }}/>
+              <div style={{ position: 'relative', width: 380, borderRadius: 28,
+                background: forceDark ? SC.ink900 : SC.paper, boxShadow: '0 24px 60px -8px rgba(0,0,0,0.35)', overflow: 'hidden' }}>
+                <TradeSheet side={webTrade.side} asset={webTrade.asset} lang={lang} dark={forceDark} inline
+                  onClose={() => setWebTrade(null)} onSubmit={onWebTradeSubmit}/>
+              </div>
+            </div>
+          )}
           {toast && (
             <div style={{
               position: 'absolute', bottom: 28, right: 28, zIndex: 60,

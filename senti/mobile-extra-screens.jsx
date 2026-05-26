@@ -333,7 +333,7 @@ function AssetDetailScreen({ asset, lang = 'ru', onBack, onTrade, dark = false }
 // ─────────────────────────────────────────────────────────────
 const TRADE_MIN_USD = 5;
 
-function TradeSheet({ side, asset, lang = 'ru', onClose, onSubmit, dark = false }) {
+function TradeSheet({ side, asset, lang = 'ru', onClose, onSubmit, dark = false, inline = false }) {
   const [amount, setAmount] = React.useState('');
   const sub     = dark ? 'rgba(255,255,255,0.5)' : SC.ink500;
   const text    = dark ? '#fff' : SC.ink1000;
@@ -355,18 +355,14 @@ function TradeSheet({ side, asset, lang = 'ru', onClose, onSubmit, dark = false 
   const tooLow = numericAmount > 0 && numericAmount < TRADE_MIN_USD;
   const canSubmit = numericAmount >= TRADE_MIN_USD;
 
-  return (
-    <div style={{ position: 'absolute', inset: 0, zIndex: 50 }}>
-      {/* backdrop */}
-      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}/>
-      {/* sheet */}
+  const sheet = (
       <div style={{
-        position: 'absolute', left: 0, right: 0, bottom: 0,
         background: cardBg, color: text,
-        borderTopLeftRadius: 36, borderTopRightRadius: 36,
+        borderTopLeftRadius: inline ? 28 : 36, borderTopRightRadius: inline ? 28 : 36,
+        borderBottomLeftRadius: inline ? 28 : 0, borderBottomRightRadius: inline ? 28 : 0,
         padding: '12px 20px 30px',
         display: 'flex', flexDirection: 'column', gap: 14,
-        boxShadow: '0 -8px 30px rgba(0,0,0,0.18)',
+        boxShadow: inline ? 'none' : '0 -8px 30px rgba(0,0,0,0.18)',
       }}>
         {/* grabber */}
         <div style={{ alignSelf: 'center', width: 40, height: 4, borderRadius: 999, background: dark ? 'rgba(255,255,255,0.2)' : SC.ink200, marginBottom: 4 }}/>
@@ -434,6 +430,16 @@ function TradeSheet({ side, asset, lang = 'ru', onClose, onSubmit, dark = false 
           </Pill>
         </div>
       </div>
+  );
+
+  if (inline) return sheet;
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, zIndex: 50 }}>
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}/>
+      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+        {sheet}
+      </div>
     </div>
   );
 }
@@ -442,7 +448,7 @@ function TradeSheet({ side, asset, lang = 'ru', onClose, onSubmit, dark = false 
 // QuickTradeSheet — asset picker for Быстрая сделка
 // Shows only Bybit crypto with live prices, then opens TradeSheet
 // ─────────────────────────────────────────────────────────────
-function QuickTradeSheet({ lang = 'ru', dark = false, onClose, onPick }) {
+function QuickTradeSheet({ lang = 'ru', dark = false, defaultSide = 'buy', onClose, onPick, inline = false }) {
   const bybitSymbols = MOB_LIVE.crypto.map(a => a.bybit);
   const { prices, loading } = typeof useBybitPrices === 'function'
     ? useBybitPrices(bybitSymbols)
@@ -454,24 +460,29 @@ function QuickTradeSheet({ lang = 'ru', dark = false, onClose, onPick }) {
   const rowBg  = dark ? 'rgba(255,255,255,0.04)' : SC.ink50;
   const border = dark ? '1px solid rgba(255,255,255,0.06)' : `1px solid ${SC.ink100}`;
 
-  return (
-    <div style={{ position: 'absolute', inset: 0, zIndex: 50 }}>
-      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}/>
-      <div style={{
-        position: 'absolute', left: 0, right: 0, bottom: 0,
-        background: cardBg, color: text,
-        borderTopLeftRadius: 36, borderTopRightRadius: 36,
-        padding: '12px 20px 34px',
-        boxShadow: '0 -8px 30px rgba(0,0,0,0.18)',
-        maxHeight: '85%', display: 'flex', flexDirection: 'column',
-      }}>
+  const content = (
+    <div style={{
+      background: cardBg, color: text,
+      borderTopLeftRadius: inline ? 28 : 36, borderTopRightRadius: inline ? 28 : 36,
+      borderBottomLeftRadius: inline ? 28 : 0, borderBottomRightRadius: inline ? 28 : 0,
+      padding: '12px 20px 34px',
+      boxShadow: inline ? 'none' : '0 -8px 30px rgba(0,0,0,0.18)',
+      maxHeight: '85%', display: 'flex', flexDirection: 'column',
+    }}>
         {/* grabber */}
         <div style={{ alignSelf: 'center', width: 40, height: 4, borderRadius: 999, background: dark ? 'rgba(255,255,255,0.2)' : SC.ink200, marginBottom: 16 }}/>
         {/* header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div>
-            <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-0.3px' }}>
-              {lang === 'ru' ? 'Быстрая сделка' : 'Quick Trade'}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-0.3px' }}>
+                {lang === 'ru' ? 'Быстрая сделка' : 'Quick Trade'}
+              </div>
+              <span style={{
+                padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700,
+                background: defaultSide === 'buy' ? SC.green : SC.ink1000,
+                color: '#fff', letterSpacing: '0.04em', textTransform: 'uppercase',
+              }}>{defaultSide === 'buy' ? (lang === 'ru' ? 'Покупка' : 'Buy') : (lang === 'ru' ? 'Продажа' : 'Sell')}</span>
             </div>
             <div style={{ fontSize: 12, color: sub, marginTop: 2, display: 'flex', alignItems: 'center', gap: 5 }}>
               <span style={{ width: 6, height: 6, borderRadius: 999, background: loading ? sub : SC.green, display: 'inline-block',
@@ -520,6 +531,16 @@ function QuickTradeSheet({ lang = 'ru', dark = false, onClose, onPick }) {
         <div style={{ marginTop: 12, fontSize: 11, color: sub, textAlign: 'center', letterSpacing: '-0.1px' }}>
           {lang === 'ru' ? `Минимальная сумма сделки — $${TRADE_MIN_USD}` : `Minimum trade amount — $${TRADE_MIN_USD}`}
         </div>
+      </div>
+  );
+
+  if (inline) return content;
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, zIndex: 50 }}>
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}/>
+      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+        {content}
       </div>
     </div>
   );
